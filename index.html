@@ -6,8 +6,21 @@
     <style>
         body { font-family: 'Segoe UI', Tahoma, sans-serif; padding: 10px; background: #f4f7f6; color: #333; }
         .container { background: white; padding: 15px; max-width: 1300px; margin: 0 auto; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-radius: 8px; }
-        h2 { text-align: center; color: #1a73e8; text-transform: uppercase; font-size: 18px; margin: 5px 0 15px 0; }
+        h2 { text-align: center; color: #1a73e8; text-transform: uppercase; font-size: 18px; margin: 5px 0 10px 0; }
         
+        /* Phần Hướng dẫn mới thêm */
+        .instruction-box { 
+            background: #fff8e1; 
+            border-left: 5px solid #ffc107; 
+            padding: 12px; 
+            margin-bottom: 15px; 
+            font-size: 13px; 
+            line-height: 1.6;
+            border-radius: 4px;
+        }
+        .instruction-box b { color: #d32f2f; }
+        .step-tag { background: #1a73e8; color: white; padding: 1px 6px; border-radius: 10px; font-size: 11px; margin-right: 5px; }
+
         table { width: 100%; border-collapse: collapse; margin-bottom: 8px; table-layout: fixed; background: #fff; }
         th, td { border: 1px solid #ddd; padding: 6px; text-align: center; font-size: 10.5px; word-wrap: break-word; }
         .section-head { background: #e8f0fe; font-weight: bold; color: #1a73e8; position: relative; height: 35px; }
@@ -43,21 +56,26 @@
 <div class="container">
     <h2>BẢNG TÍNH LƯƠNG CHI TIẾT</h2>
 
+    <div class="instruction-box">
+        <div><span class="step-tag">LẦN ĐẦU:</span> Nhập <b>Số công chuẩn</b> & <b>Công thực tế</b> ➔ Nhập <b>Lương cơ bản</b> & <b>Các khoản phụ cấp</b> ➔ Nếu là <b>Nam</b>: Bỏ chọn ô "PC Phụ nữ" ➔ Nhập <b>Giờ tăng ca</b>.</div>
+        <div><span class="step-tag">LẦN SAU:</span> Dữ liệu cũ đã được lưu, bạn <b>chỉ cần nhập lại Giờ tăng ca</b> và điều chỉnh Công thực tế (nếu có).</div>
+    </div>
+
     <div class="info-bar">
         <div style="display: flex; gap: 10px; border-right: 1px solid #ddd; padding-right: 15px;">
             <label style="font-size: 12px; font-weight: bold;">Công chuẩn: <input type="number" id="soCongChuan" value="26" style="width: 30px;"></label>
             <label style="font-size: 12px; font-weight: bold;">Thực tế: <input type="text" class="money save" id="soNgayGio" value="26" style="width: 40px;"></label>
         </div>
-        <div class="debug-item" style="color: #e91e63;">Lương ngày công: <span id="show_luong_ngay_cong">0</span></div>
+        <div class="debug-item" style="color: #e91e63;">Lương công: <span id="show_luong_ngay_cong">0</span></div>
         <div class="debug-item" style="color: #2e7d32;">Tổng Phụ Cấp: <span id="show_total_pc">0</span></div>
-        <div class="debug-item">Tổng lương tính tăng ca: <span id="show_goc" class="res-num">0</span></div>
-        <div class="debug-item">Lương tính giờ tăng ca: <span id="show_dongia" style="color: #673ab7;">0</span></div>
+        <div class="debug-item">Gốc tăng ca: <span id="show_goc" class="res-num">0</span></div>
+        <div class="debug-item">Đơn giá giờ: <span id="show_dongia" style="color: #673ab7;">0</span></div>
     </div>
 
     <table>
         <tr class="section-head">
             <th colspan="12">
-                1. THÔNG TIN LƯƠNG
+                1. THÔNG TIN LƯƠNG (CỐ ĐỊNH)
                 <button class="btn-clear-section" onclick="clearSection1()">🗑 Xoá mục 1</button>
             </th>
         </tr>
@@ -81,7 +99,7 @@
             <td rowspan="2" id="tong1" class="total-cell"></td>
         </tr>
         <tr>
-            <td style="font-size: 9px; color: #888;">Theo ngày công -></td>
+            <td style="font-size: 9px; color: #888;">Thực tế -></td>
             <td id="res_pccv" class="pc-res-val"></td>
             <td id="res_pckn" class="pc-res-val"></td>
             <td id="res_pcat" class="pc-res-val"></td>
@@ -122,7 +140,7 @@
     </table>
 
     <table>
-        <tr class="section-head"><th colspan="9">3. TĂNG CA</th></tr>
+        <tr class="section-head"><th colspan="9">3. TĂNG CA (NHẬP MỖI THÁNG)</th></tr>
         <tr style="background: #fafafa;">
             <th width="80px">Tăng ca</th>
             <th>TC 150%</th>
@@ -180,6 +198,7 @@
 </div>
 
 <script>
+/* Toàn bộ phần Script giữ nguyên như code bạn cung cấp */
 let isReady = false;
 window.addEventListener('DOMContentLoaded', () => { load(); isReady = true; calculateAll(); });
 
@@ -197,7 +216,6 @@ function calculateAll() {
     const thực = parseFloat(document.getElementById('soNgayGio').value.replace(/,/g, '')) || 0;
     const tile = thực / chuẩn;
 
-    // 1. GỐC TĂNG CA & LƯƠNG NGÀY CÔNG
     const gốc = getVal('luongCB') + getVal('pccv') + getVal('pckn') + getVal('pctn') + getVal('pcno') + getVal('pcsk');
     const đơnGiá = gốc / chuẩn / 8;
     const luongNgayCong = getVal('luongCB') * tile;
@@ -205,12 +223,10 @@ function calculateAll() {
     const pnu_on = document.getElementById('chk_phunu').checked;
     const pnu_val = pnu_on ? (đơnGiá * 2.25) : 0;
 
-    // MỤC 1: TỔNG LÝ THUYẾT (Full 100%)
     let tongLyThuyet1 = getVal('luongCB') + getVal('pccv') + getVal('pckn') + getVal('pcat') + getVal('pcpccc') + 
                         getVal('pcsk') + getVal('pctn') + getVal('pcdt') + getVal('pcno') + getVal('pcdl') + getVal('pccc');
     setTxt('tong1', tongLyThuyet1);
 
-    // TÍNH PHỤ CẤP THỰC TẾ MỤC 1
     const pcList = [
         {id:'pccv', res:'res_pccv'}, {id:'pckn', res:'res_pckn'}, {id:'pcat', res:'res_pcat'},
         {id:'pcpccc', res:'res_pcpccc'}, {id:'pcsk', res:'res_pcsk'}, {id:'pctn', res:'res_pctn'},
@@ -224,20 +240,17 @@ function calculateAll() {
         tongPC1_thuc_te += val;
     });
 
-    // CẬP NHẬT THANH TOP
     document.getElementById('show_luong_ngay_cong').innerText = Math.round(luongNgayCong).toLocaleString('en-US');
-    document.getElementById('show_total_pc').innerText = Math.round(tongPC1_thuc_te).toLocaleString('en-US'); // Chỉ tính Mục 1
+    document.getElementById('show_total_pc').innerText = Math.round(tongPC1_thuc_te).toLocaleString('en-US');
     document.getElementById('show_goc').innerText = gốc.toLocaleString('en-US');
     document.getElementById('show_dongia').innerText = Math.round( đơnGiá ).toLocaleString('en-US');
     document.getElementById('phunu_res').innerText = pnu_val > 0 ? Math.round( pnu_val ).toLocaleString('en-US') : "0";
 
-    // 2. MỤC 2 (Các khoản thưởng/phụ cấp khác - Không tính vào Tổng Phụ Cấp trên Top)
     const ids2 = ['phep','dcl','dean','tk','buaan','hoso','trenho'];
     let t2_total = pnu_val; 
     ids2.forEach(id => { t2_total += getVal(id); });
     setTxt('tong2', t2_total);
 
-    // 3. MỤC 3 (Tăng ca)
     const tcs = [
         {g:'g150',r:'r150',h:1.5},{g:'g200',r:'r200',h:2},{g:'g210',r:'r210',h:2.1},
         {g:'g200cn',r:'r200cn',h:2},{g:'g270',r:'r270',h:2.7},{g:'g300',r:'r300',h:3},{g:'g390',r:'r390',h:3.9}
@@ -245,12 +258,10 @@ function calculateAll() {
     let t3 = 0; tcs.forEach(x => { let s = đơnGiá * getVal(x.g) * x.h; setTxt(x.r, s); t3 += s; });
     setTxt('tong3', t3);
 
-    // 4. MỤC 4 (Giảm trừ)
     const bh = (getVal('luongCB') + getVal('pccv') + getVal('pckn') + getVal('pcsk') + getVal('pctn')) * 0.105;
     const t4 = bh + 30000 + getVal('val_trukhac');
     setTxt('val_bhxh', bh); setTxt('tong4', t4);
 
-    // THỰC LĨNH
     document.getElementById('final_total').innerText = Math.round(luongNgayCong + tongPC1_thuc_te + t2_total + t3 - t4).toLocaleString('en-US');
     save();
 }
