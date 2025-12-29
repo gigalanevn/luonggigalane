@@ -2,25 +2,57 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Bảng Tính Lương Chuyên Nghiệp - 2025</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; padding: 10px; background: #f4f7f6; color: #333; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; padding: 10px; background: #f4f7f6; color: #333; margin: 0; }
         .container { background: white; padding: 15px; max-width: 1300px; margin: 0 auto; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-radius: 8px; }
         h2 { text-align: center; color: #1a73e8; text-transform: uppercase; font-size: 18px; margin: 5px 0 10px 0; }
         
-        /* Phần Hướng dẫn mới thêm */
-        .instruction-box { 
-            background: #fff8e1; 
-            border-left: 5px solid #ffc107; 
-            padding: 12px; 
-            margin-bottom: 15px; 
-            font-size: 13px; 
-            line-height: 1.6;
-            border-radius: 4px;
+        /* 1. THÔNG BÁO XOAY MÀN HÌNH */
+        #rotation-notice {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #1a73e8;
+            color: white;
+            z-index: 9999;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
         }
-        .instruction-box b { color: #d32f2f; }
-        .step-tag { background: #1a73e8; color: white; padding: 1px 6px; border-radius: 10px; font-size: 11px; margin-right: 5px; }
 
+        @media screen and (max-width: 900px) and (orientation: portrait) {
+            #rotation-notice { display: flex; }
+            .container { display: none; }
+        }
+
+        .phone-icon {
+            width: 50px; height: 90px; border: 3px solid white; border-radius: 8px;
+            margin-bottom: 20px; animation: rotateDevice 2s ease-in-out infinite;
+            position: relative;
+        }
+        .phone-icon::after {
+            content: ""; position: absolute; bottom: 5px; left: 50%;
+            transform: translateX(-50%); width: 8px; height: 8px;
+            background: white; border-radius: 50%;
+        }
+        @keyframes rotateDevice {
+            0% { transform: rotate(0deg); }
+            50% { transform: rotate(90deg); }
+            100% { transform: rotate(90deg); }
+        }
+
+        /* 2. HƯỚNG DẪN */
+        .instruction-box { 
+            background: #fff8e1; border-left: 5px solid #ffc107; 
+            padding: 10px; margin-bottom: 15px; font-size: 12px; 
+            line-height: 1.5; border-radius: 4px;
+        }
+        .step-tag { background: #1a73e8; color: white; padding: 1px 6px; border-radius: 10px; font-size: 10px; margin-right: 5px; font-weight: bold; }
+
+        /* 3. BẢNG BIỂU & NHẬP LIỆU */
         table { width: 100%; border-collapse: collapse; margin-bottom: 8px; table-layout: fixed; background: #fff; }
         th, td { border: 1px solid #ddd; padding: 6px; text-align: center; font-size: 10.5px; word-wrap: break-word; }
         .section-head { background: #e8f0fe; font-weight: bold; color: #1a73e8; position: relative; height: 35px; }
@@ -39,30 +71,30 @@
         
         .info-bar { display: flex; justify-content: space-around; align-items: center; margin-bottom: 10px; padding: 10px; background: #fff; border: 1px solid #1a73e8; border-radius: 5px; flex-wrap: wrap; gap: 10px; }
         .debug-item { font-size: 13px; font-weight: bold; border-right: 1px solid #ddd; padding-right: 15px; }
-        .debug-item:last-child { border-right: none; }
         
         input { width: 90%; padding: 4px; text-align: right; border: 1px solid #ccc; border-radius: 3px; font-size: 11px; }
         input[readonly] { background-color: #eee; cursor: not-allowed; font-weight: bold; color: #555; }
         
         .header-chk-container { display: flex; align-items: center; justify-content: center; gap: 4px; color: #2e7d32; cursor: pointer; }
-        .chk-phunu { cursor: pointer; width: 13px; height: 13px; margin: 0; }
         
         .final-box { background: #1a73e8; color: white; padding: 12px; border-radius: 5px; text-align: right; margin-top: 5px; }
         .grand-total { font-size: 28px; font-weight: bold; color: #ffeb3b; margin-left: 10px; }
     </style>
 </head>
 <body>
+
 <div id="rotation-notice">
     <div class="phone-icon"></div>
-    <h3 style="margin: 10px 20px;">Vui lòng xoay ngang màn hình</h3>
-    <p style="font-size: 14px; opacity: 0.9;">Để trải nghiệm bảng tính lương tốt nhất</p>
+    <h3 style="margin: 10px 20px;">VUI LÒNG XOAY NGANG MÀN HÌNH</h3>
+    <p style="font-size: 14px; opacity: 0.9;">Để xem và nhập liệu bảng lương chính xác nhất</p>
 </div>
+
 <div class="container">
     <h2>BẢNG TÍNH LƯƠNG CHI TIẾT</h2>
 
     <div class="instruction-box">
-        <div><span class="step-tag">LẦN ĐẦU:</span> Nhập <b>Số công chuẩn</b> & <b>Công thực tế</b> ➔ Nhập <b>Lương cơ bản</b> & <b>Các khoản phụ cấp</b> ➔ Nếu là <b>Nam</b>: Bỏ chọn ô "PC Phụ nữ" ➔ Nhập <b>Giờ tăng ca</b>.</div>
-        <div><span class="step-tag">LẦN SAU:</span> Dữ liệu cũ đã được lưu, bạn <b>chỉ cần nhập lại Giờ tăng ca</b> và điều chỉnh Công thực tế (nếu có).</div>
+        <div><span class="step-tag">LẦN ĐẦU:</span> Nhập <b>Số công chuẩn/Thực tế</b> ➔ <b>Lương CB & Phụ cấp</b> ➔ Nam: Bỏ chọn <b>"PC Phụ nữ"</b> ➔ Nhập <b>Giờ tăng ca</b>.</div>
+        <div><span class="step-tag">LẦN SAU:</span> Chỉ cần nhập lại <b>Giờ tăng ca</b> & <b>Công thực tế</b> (Dữ liệu khác đã tự lưu).</div>
     </div>
 
     <div class="info-bar">
@@ -71,17 +103,14 @@
             <label style="font-size: 12px; font-weight: bold;">Thực tế: <input type="text" class="money save" id="soNgayGio" value="26" style="width: 40px;"></label>
         </div>
         <div class="debug-item" style="color: #e91e63;">Lương công: <span id="show_luong_ngay_cong">0</span></div>
-        <div class="debug-item" style="color: #2e7d32;">Tổng Phụ Cấp: <span id="show_total_pc">0</span></div>
-        <div class="debug-item">Gốc tăng ca: <span id="show_goc" class="res-num">0</span></div>
-        <div class="debug-item">Đơn giá giờ: <span id="show_dongia" style="color: #673ab7;">0</span></div>
+        <div class="debug-item" style="color: #2e7d32;">Tổng PC (1): <span id="show_total_pc">0</span></div>
+        <div class="debug-item">Gốc TC: <span id="show_goc" class="res-num">0</span></div>
+        <div class="debug-item">Đơn giá/h: <span id="show_dongia" style="color: #673ab7;">0</span></div>
     </div>
 
     <table>
         <tr class="section-head">
-            <th colspan="12">
-                1. THÔNG TIN LƯƠNG (CỐ ĐỊNH)
-                <button class="btn-clear-section" onclick="clearSection1()">🗑 Xoá mục 1</button>
-            </th>
+            <th colspan="12">1. THÔNG TIN LƯƠNG (CỐ ĐỊNH) <button class="btn-clear-section" onclick="clearSection1()">🗑 Xoá mục 1</button></th>
         </tr>
         <tr style="color: #555; background: #fafafa;">
             <th class="tc-base-cell">Lương CB</th><th class="tc-base-cell">Chức vụ</th><th class="tc-base-cell">Kỹ năng</th>
@@ -104,15 +133,9 @@
         </tr>
         <tr>
             <td style="font-size: 9px; color: #888;">Thực tế -></td>
-            <td id="res_pccv" class="pc-res-val"></td>
-            <td id="res_pckn" class="pc-res-val"></td>
-            <td id="res_pcat" class="pc-res-val"></td>
-            <td id="res_pcpccc" class="pc-res-val"></td>
-            <td id="res_pcsk" class="pc-res-val"></td>
-            <td id="res_pctn" class="pc-res-val"></td>
-            <td id="res_pcdt" class="pc-res-val"></td>
-            <td id="res_pcno" class="pc-res-val"></td>
-            <td id="res_pcdl" class="pc-res-val"></td>
+            <td id="res_pccv" class="pc-res-val"></td><td id="res_pckn" class="pc-res-val"></td><td id="res_pcat" class="pc-res-val"></td>
+            <td id="res_pcpccc" class="pc-res-val"></td><td id="res_pcsk" class="pc-res-val"></td><td id="res_pctn" class="pc-res-val"></td>
+            <td id="res_pcdt" class="pc-res-val"></td><td id="res_pcno" class="pc-res-val"></td><td id="res_pcdl" class="pc-res-val"></td>
             <td id="res_pccc" class="pc-res-val"></td>
         </tr>
     </table>
@@ -121,24 +144,15 @@
         <tr class="section-head"><th colspan="10">2. KHOẢN THU KHÁC</th></tr>
         <tr style="color: #555; background: #fafafa;">
             <th width="12%">Mô tả</th><th>Phép tồn</th><th>Đ/C lương</th><th>Thưởng đề án</th><th>Thưởng khác</th><th>PC Bữa ăn</th><th>PC Hồ sơ</th>
-            <th>
-                <label class="header-chk-container">
-                    <span>PC Phụ nữ</span>
-                    <input type="checkbox" id="chk_phunu" class="chk-phunu save-chk" checked onchange="calculateAll()">
-                </label>
-            </th>
+            <th><label class="header-chk-container"><span>PC Phụ nữ</span><input type="checkbox" id="chk_phunu" class="save-chk" checked onchange="calculateAll()"></label></th>
             <th>PC Trẻ nhỏ</th><th class="total-cell">Tổng (2)</th>
         </tr>
         <tr>
             <td><strong>Số tiền</strong></td>
-            <td><input type="text" class="money save" id="phep"></td>
-            <td><input type="text" class="money save" id="dcl"></td>
-            <td><input type="text" class="money save" id="dean"></td>
-            <td><input type="text" class="money save" id="tk"></td>
-            <td><input type="text" class="money save" id="buaan"></td>
-            <td><input type="text" class="money save" id="hoso"></td>
-            <td id="phunu_res" class="auto-fill">0</td>
-            <td><input type="text" class="money save" id="trenho"></td>
+            <td><input type="text" class="money save" id="phep"></td><td><input type="text" class="money save" id="dcl"></td>
+            <td><input type="text" class="money save" id="dean"></td><td><input type="text" class="money save" id="tk"></td>
+            <td><input type="text" class="money save" id="buaan"></td><td><input type="text" class="money save" id="hoso"></td>
+            <td id="phunu_res" class="auto-fill">0</td><td><input type="text" class="money save" id="trenho"></td>
             <td id="tong2" class="total-cell"></td>
         </tr>
     </table>
@@ -146,46 +160,26 @@
     <table>
         <tr class="section-head"><th colspan="9">3. TĂNG CA (NHẬP MỖI THÁNG)</th></tr>
         <tr style="background: #fafafa;">
-            <th width="80px">Tăng ca</th>
-            <th>TC 150%</th>
-            <th>TC Đêm 200%</th>
-            <th>TC Sau 22h 210%</th>
-            <th>TC CN 200%</th>
-            <th>TC Đêm CN 270%</th>
-            <th>TC Lễ 300%</th>
-            <th>TC Đêm Lễ 390%</th>
-            <th class="total-cell">Tổng (3)</th>
+            <th width="80px">Tăng ca</th><th>TC 150%</th><th>TC Đêm 200%</th><th>TC 22h 210%</th><th>TC CN 200%</th><th>TC Đêm CN 270%</th><th>TC Lễ 300%</th><th>TC Đêm Lễ 390%</th><th class="total-cell">Tổng (3)</th>
         </tr>
         <tr>
             <td><strong>Giờ</strong></td>
-            <td><input type="text" class="money save" id="g150"></td>
-            <td><input type="text" class="money save" id="g200"></td>
-            <td><input type="text" class="money save" id="g210"></td>
-            <td><input type="text" class="money save" id="g200cn"></td>
-            <td><input type="text" class="money save" id="g270"></td>
-            <td><input type="text" class="money save" id="g300"></td>
-            <td><input type="text" class="money save" id="g390"></td>
-            <td rowspan="2" id="tong3" class="total-cell"></td>
+            <td><input type="text" class="money save" id="g150"></td><td><input type="text" class="money save" id="g200"></td>
+            <td><input type="text" class="money save" id="g210"></td><td><input type="text" class="money save" id="g200cn"></td>
+            <td><input type="text" class="money save" id="g270"></td><td><input type="text" class="money save" id="g300"></td>
+            <td><input type="text" class="money save" id="g390"></td><td rowspan="2" id="tong3" class="total-cell"></td>
         </tr>
         <tr>
             <td><strong>Tiền</strong></td>
-            <td id="r150" class="res-num"></td>
-            <td id="r200" class="res-num"></td>
-            <td id="r210" class="res-num"></td>
-            <td id="r200cn" class="res-num"></td>
-            <td id="r270" class="res-num"></td>
-            <td id="r300" class="res-num"></td>
-            <td id="r390" class="res-num"></td>
+            <td id="r150" class="res-num"></td><td id="r200" class="res-num"></td><td id="r210" class="res-num"></td>
+            <td id="r200cn" class="res-num"></td><td id="r270" class="res-num"></td><td id="r300" class="res-num"></td><td id="r390" class="res-num"></td>
         </tr>
     </table>
 
     <table style="width: 100%;">
         <tr class="section-head"><th colspan="4">4. GIẢM TRỪ</th></tr>
         <tr>
-            <th width="25%">Bảo hiểm (10.5%)</th>
-            <th width="25%">Công đoàn (Cố định)</th>
-            <th width="25%">Khoản trừ khác</th>
-            <th class="total-cell">Tổng (4)</th>
+            <th width="25%">Bảo hiểm (10.5%)</th><th width="25%">Công đoàn</th><th width="25%">Khoản trừ khác</th><th class="total-cell">Tổng (4)</th>
         </tr>
         <tr>
             <td id="val_bhxh" style="color: red;"></td>
@@ -202,14 +196,12 @@
 </div>
 
 <script>
-/* Toàn bộ phần Script giữ nguyên như code bạn cung cấp */
 let isReady = false;
 window.addEventListener('DOMContentLoaded', () => { load(); isReady = true; calculateAll(); });
 
 function clearSection1() {
-    if(confirm("Xoá toàn bộ dữ liệu Mục 1?")) {
+    if(confirm("Xoá toàn bộ dữ liệu Mục 1 (Lương CB & Phụ cấp)?")) {
         document.querySelectorAll('.group1').forEach(i => i.value = "");
-        document.getElementById('chk_phunu').checked = true;
         calculateAll();
     }
 }
@@ -234,8 +226,7 @@ function calculateAll() {
     const pcList = [
         {id:'pccv', res:'res_pccv'}, {id:'pckn', res:'res_pckn'}, {id:'pcat', res:'res_pcat'},
         {id:'pcpccc', res:'res_pcpccc'}, {id:'pcsk', res:'res_pcsk'}, {id:'pctn', res:'res_pctn'},
-        {id:'pcdt', res:'res_pcdt'}, {id:'pcno', res:'res_pcno'}, {id:'pcdl', res:'res_pcdl'},
-        {id:'pccc', res:'res_pccc'}
+        {id:'pcdt', res:'res_pcdt'}, {id:'pcno', res:'res_pcno'}, {id:'pcdl', res:'res_pcdl'}, {id:'pccc', res:'res_pccc'}
     ];
     let tongPC1_thuc_te = 0;
     pcList.forEach(item => {
@@ -246,19 +237,15 @@ function calculateAll() {
 
     document.getElementById('show_luong_ngay_cong').innerText = Math.round(luongNgayCong).toLocaleString('en-US');
     document.getElementById('show_total_pc').innerText = Math.round(tongPC1_thuc_te).toLocaleString('en-US');
-    document.getElementById('show_goc').innerText = gốc.toLocaleString('en-US');
-    document.getElementById('show_dongia').innerText = Math.round( đơnGiá ).toLocaleString('en-US');
-    document.getElementById('phunu_res').innerText = pnu_val > 0 ? Math.round( pnu_val ).toLocaleString('en-US') : "0";
+    document.getElementById('show_goc').innerText = Math.round(goc).toLocaleString('en-US');
+    document.getElementById('show_dongia').innerText = Math.round(đơnGiá).toLocaleString('en-US');
+    document.getElementById('phunu_res').innerText = pnu_val > 0 ? Math.round(pnu_val).toLocaleString('en-US') : "0";
 
     const ids2 = ['phep','dcl','dean','tk','buaan','hoso','trenho'];
-    let t2_total = pnu_val; 
-    ids2.forEach(id => { t2_total += getVal(id); });
+    let t2_total = pnu_val; ids2.forEach(id => { t2_total += getVal(id); });
     setTxt('tong2', t2_total);
 
-    const tcs = [
-        {g:'g150',r:'r150',h:1.5},{g:'g200',r:'r200',h:2},{g:'g210',r:'r210',h:2.1},
-        {g:'g200cn',r:'r200cn',h:2},{g:'g270',r:'r270',h:2.7},{g:'g300',r:'r300',h:3},{g:'g390',r:'r390',h:3.9}
-    ];
+    const tcs = [{g:'g150',r:'r150',h:1.5},{g:'g200',r:'r200',h:2},{g:'g210',r:'r210',h:2.1},{g:'g200cn',r:'r200cn',h:2},{g:'g270',r:'r270',h:2.7},{g:'g300',r:'r300',h:3},{g:'g390',r:'r390',h:3.9}];
     let t3 = 0; tcs.forEach(x => { let s = đơnGiá * getVal(x.g) * x.h; setTxt(x.r, s); t3 += s; });
     setTxt('tong3', t3);
 
@@ -274,22 +261,16 @@ function getVal(id) { let el = document.getElementById(id); return (el && el.val
 function setTxt(id, v) { let el = document.getElementById(id); if(el) el.innerText = v>0 ? Math.round(v).toLocaleString('en-US') : ""; }
 
 function save() { 
-    const d = {}; 
-    document.querySelectorAll('.save').forEach(e => d[e.id]=e.value); 
+    const d = {}; document.querySelectorAll('.save').forEach(e => d[e.id]=e.value); 
     document.querySelectorAll('.save-chk').forEach(e => d[e.id]=e.checked);
     d['soCongChuan'] = document.getElementById('soCongChuan').value;
-    localStorage.setItem('payroll_v2025_v19', JSON.stringify(d)); 
+    localStorage.setItem('payroll_v2025_v20', JSON.stringify(d)); 
 }
 
 function load() { 
-    const s = localStorage.getItem('payroll_v2025_v19'); if(!s) return;
-    const d = JSON.parse(s); 
-    for(let k in d) { 
-        let e = document.getElementById(k); 
-        if(e) {
-            if(e.type === 'checkbox') e.checked = d[k];
-            else e.value = d[k];
-        }
+    const s = localStorage.getItem('payroll_v2025_v20'); if(!s) return;
+    const d = JSON.parse(s); for(let k in d) { 
+        let e = document.getElementById(k); if(e) { if(e.type === 'checkbox') e.checked = d[k]; else e.value = d[k]; }
     }
 }
 
