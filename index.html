@@ -7,7 +7,7 @@
     <style>
         :root { 
             --blue-main: #1a73e8; 
-            --blue-focus: #007bff;
+            --blue-focus: #007bff; /* Màu xanh khi nhấn vào */
             --orange-border: #ff9800; 
             --blue-light: #e3f2fd; 
             --yellow-sum: #fff9c4;
@@ -21,47 +21,43 @@
             margin-bottom: 15px; text-transform: uppercase; border-bottom: 2px solid #b71c1c; padding-bottom: 5px;
         }
 
-        .header-top { 
-            display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
-            margin-bottom: 10px; gap: 10px; border-bottom: 1px solid #ddd; padding-bottom: 10px;
+        /* --- HIỆU ỨNG VIỀN XANH KHI NHẤN VÀO (FOCUS) --- */
+        /* Áp dụng cho tất cả input và select */
+        input:focus, select:focus {
+            outline: none !important;
+            border: 2px solid var(--blue-focus) !important; /* Viền chuyển xanh */
+            background-color: #ffffff !important; /* Giữ nguyên nền trắng */
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* Hiệu ứng đổ bóng viền */
         }
+
+        .header-top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; margin-bottom: 10px; gap: 10px; border-bottom: 1px solid #ddd; padding-bottom: 10px; }
         .header-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
         
-        .top-final-box {
-            background: var(--blue-light); border: 2px solid var(--blue-main); 
-            padding: 8px 15px; border-radius: 8px; display: flex; align-items: center;
-        }
+        .top-final-box { background: var(--blue-light); border: 2px solid var(--blue-main); padding: 8px 15px; border-radius: 8px; display: flex; align-items: center; }
         .top-final-label { color: #0d47a1; font-weight: bold; font-size: 15px; margin-right: 10px; }
         .top-final-val { color: #b71c1c; font-size: 26px; font-weight: bold; }
 
-        .guide-box {
-            background: #fff3e0; border-left: 4px solid #ff9800; padding: 10px;
-            margin-bottom: 10px; font-size: 12px; color: #5d4037; line-height: 1.4;
-        }
+        .guide-box { background: #fff3e0; border-left: 4px solid #ff9800; padding: 10px; margin-bottom: 10px; font-size: 12px; color: #5d4037; line-height: 1.4; }
 
-        .storage-bar {
-            background: #f1f3f4; padding: 8px; border-radius: 8px; margin-bottom: 10px;
-            display: flex; align-items: center; gap: 8px; flex-wrap: wrap; border: 1px solid #ddd; font-size: 13px;
-        }
+        .storage-bar { background: #f1f3f4; padding: 8px; border-radius: 8px; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; border: 1px solid #ddd; font-size: 13px; }
         .btn-save { background: #28a745; color: white; border: none; padding: 6px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; }
         
-        .input-name { border: none; border-bottom: 2px solid var(--border-black); font-weight: bold; color: var(--blue-main); padding: 5px; font-size: 16px; width: 150px; outline: none; }
-        .select-date { border: 2px solid var(--orange-border); border-radius: 4px; padding: 4px; font-weight: bold; }
+        .input-name { border: none; border-bottom: 2px solid var(--border-black); font-weight: bold; color: var(--blue-main); padding: 5px; font-size: 16px; width: 150px; outline: none; background: transparent; }
+        /* Riêng ô tên chỉ đổi màu gạch chân */
+        .input-name:focus { border-bottom: 2.5px solid var(--blue-focus) !important; box-shadow: none; }
 
-        .info-bar { 
-            display: flex; align-items: center; gap: 12px;
-            border: 2px solid var(--blue-main); border-radius: 8px; padding: 8px; margin-bottom: 10px; background: #fff;
-            flex-wrap: wrap; font-size: 11px; font-weight: bold;
-        }
-        .input-small { width: 40px !important; text-align: center; padding: 4px !important; border: 1px solid var(--orange-border) !important; }
+        .select-date { border: 2px solid var(--orange-border); border-radius: 4px; padding: 4px; font-weight: bold; background: white; }
 
+        .info-bar { display: flex; align-items: center; gap: 12px; border: 2px solid var(--blue-main); border-radius: 8px; padding: 8px; margin-bottom: 10px; background: #fff; flex-wrap: wrap; font-size: 11px; font-weight: bold; }
+        .input-small { width: 40px !important; text-align: center; padding: 4px !important; border: 1px solid var(--orange-border) !important; border-radius: 4px; }
+
+        /* Các ô nhập liệu chính */
         input[type="text"]:not(.input-name):not(.input-small) { 
-            border: 2px solid var(--orange-border) !important;
+            border: 2px solid var(--orange-border);
             border-radius: 4px; padding: 6px; font-size: 14px; 
             background-color: #ffffff; color: #000; box-sizing: border-box;
-            width: 100%; /* Mặc định đầy ô chứa */
+            width: 100%; transition: border 0.2s;
         }
-        input:focus { outline: none; border-color: var(--blue-focus) !important; background: #f0f7ff; }
 
         table { width: 100%; border-collapse: collapse; margin-bottom: 10px; table-layout: fixed; }
         th, td { border: 1px solid #888; padding: 5px; text-align: center; font-size: 11px; }
@@ -69,37 +65,15 @@
         .col-gray { background: #f1f3f4; font-weight: bold; }
         .col-sum { background: var(--yellow-sum) !important; font-weight: bold; color: #d32f2f; }
 
-        /* ĐIỀU CHỈNH QUAN TRỌNG CHO MOBILE */
         @media screen and (orientation: portrait) {
             table, thead, tbody, th, td, tr { display: block; width: 100%; }
             thead tr:not(.section-head) { display: none; }
             tr { border: 2px solid #aaa; margin-bottom: 10px; border-radius: 8px; overflow: hidden; }
             td { display: flex; align-items: center; min-height: 50px; border: none !important; border-bottom: 1px solid #eee !important; padding: 0 !important; }
-            
-            .m-lbl { 
-                width: 40%; /* Giảm độ rộng nhãn */
-                background: #f0f0f0; padding-left: 10px; font-weight: bold; height: 50px; 
-                display: flex; align-items: center; font-size: 10px; 
-                border-right: 1px solid #888; text-align: left; 
-                flex-shrink: 0; /* Không cho nhãn bị co lại */
-            }
-            .input-wrap { 
-                flex: 1; display: flex; flex-direction: column; 
-                justify-content: center; align-items: flex-end; 
-                padding-right: 8px; overflow: hidden; 
-            }
-            /* Cố định độ rộng ô nhập để không tràn vạch */
-            input:not(.chk-box):not(.input-name):not(.input-small) { 
-                width: 95% !important; 
-                text-align: right !important; 
-                height: 32px;
-            }
+            .m-lbl { width: 40%; background: #f0f0f0; padding-left: 10px; font-weight: bold; height: 50px; display: flex; align-items: center; font-size: 10px; border-right: 1px solid #888; text-align: left; flex-shrink: 0; }
+            .input-wrap { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: flex-end; padding-right: 8px; overflow: hidden; }
+            input:not(.chk-box):not(.input-name):not(.input-small) { width: 95% !important; text-align: right !important; height: 32px; }
             .res-val { color: #28a745; font-weight: bold; font-size: 10px; margin-top: 2px; }
-        }
-
-        @media screen and (orientation: landscape), screen and (min-width: 900px) {
-            .m-lbl { display: none; }
-            .res-val { display: block; font-size: 10px; color: #28a745; margin-top: 2px; }
         }
     </style>
 </head>
@@ -109,7 +83,7 @@
     <div class="main-header-title">PHIẾU LƯƠNG GIGALANE</div>
 
     <div class="guide-box">
-        <b>💡 Hướng dẫn:</b> 1. Chọn <b>Tháng/Năm</b> | 2. Mục 1  Nhập lương và trợ cấp (chỉ nhập lần đầu) | 3. Mục 2 nhập các khoản thu, nếu là <b>NAM</b> bỏ tick PNữ | 4. Nhập số <b>giờ</b> tăng ca (nếu lẻ dùng dấu <b>.</b> ví dụ 10.5 ) | 5. Nhấn <b>Lưu</b> để lưu vào lịch sử.
+        <b>💡 Hướng dẫn:</b> 1. Chọn <b>Tháng/Năm</b> | 2. Mục 1 Nhập lương và trợ cấp (chỉ nhập lần đầu) | 3. Mục 2 nhập các khoản thu, nếu là <b>NAM</b> bỏ tick PNữ | 4. Nhập số <b>giờ</b> tăng ca (nếu lẻ dùng dấu <b>.</b> ví dụ 10.5 ) | 5. Nhấn <b>Lưu</b> để lưu vào lịch sử.
     </div>
 
     <div class="header-top">
@@ -139,33 +113,33 @@
     </div>
     
     <div class="info-bar">
-        <div>Công tính tăng ca: <input type="text" id="soCongChuan" value="26" class="save only-num-dot input-small"></div>
+        <div>Công tính TC: <input type="text" id="soCongChuan" value="26" class="save only-num-dot input-small"></div>
         <div>Công thực tế: <input type="text" id="soNgayGio" value="26" class="save only-num-dot input-small"></div>
-        <div>Lương ngày: <span id="r_ngaycong" style="color:var(--blue-main)">0</span></div>
-        <div>Tổng PC: <span id="top_tongPC" style="color:var(--blue-main)">0</span></div>
-        <div>Lương TC: <span id="top_luongTC" style="color:var(--blue-main)">0</span></div>
+        <div>Lương ngày công: <span id="r_ngaycong" style="color:var(--blue-main)">0</span></div>
+        <div>Tổng Phụ cấp: <span id="top_tongPC" style="color:var(--blue-main)">0</span></div>
+        <div>Lương Tính tăng ca: <span id="top_luongTC" style="color:var(--blue-main)">0</span></div>
     </div>
 
     <table>
         <thead>
-            <tr class="section-head"><th colspan="12">1. THÔNG TIN LƯƠNG </th></tr>
+            <tr class="section-head"><th colspan="12">1. THÔNG TIN LƯƠNG</th></tr>
             <tr class="col-gray">
                 <th>Lương CB</th><th>Chức vụ</th><th>Kỹ năng</th><th>ATVSV</th><th>PCCC</th><th>Soi kính</th><th>Thâm niên</th><th>ĐT</th><th>Nhà ở</th><th>Đi lại</th><th>C.Cần</th><th class="col-sum">Tổng (1)</th>
             </tr>
         </thead>
         <tbody>
             <tr>
-                <td><div class="m-lbl">Lương CB</div><div class="input-wrap"><input type="text" class="money save only-num" id="luongCB" ><span class="res-val" id="r_luongCB"></span></div></td>
+                <td><div class="m-lbl">Lương CB</div><div class="input-wrap"><input type="text" class="money save only-num" id="luongCB"><span class="res-val" id="r_luongCB"></span></div></td>
                 <td><div class="m-lbl">Chức vụ</div><div class="input-wrap"><input type="text" class="money save only-num" id="pccv"><span class="res-val" id="r_pccv"></span></div></td>
-                <td><div class="m-lbl">Kỹ năng</div><div class="input-wrap"><input type="text" class="money save only-num" id="pckn" ><span class="res-val" id="r_pckn"></span></div></td>
+                <td><div class="m-lbl">Kỹ năng</div><div class="input-wrap"><input type="text" class="money save only-num" id="pckn"><span class="res-val" id="r_pckn"></span></div></td>
                 <td><div class="m-lbl">ATVSV</div><div class="input-wrap"><input type="text" class="money save only-num" id="pcat"><span class="res-val" id="r_pcat"></span></div></td>
                 <td><div class="m-lbl">PCCC</div><div class="input-wrap"><input type="text" class="money save only-num" id="pcpccc"><span class="res-val" id="r_pcpccc"></span></div></td>
-                <td><div class="m-lbl">Soi kính</div><div class="input-wrap"><input type="text" class="money save only-num" id="pcsk" ><span class="res-val" id="r_pcsk"></span></div></td>
-                <td><div class="m-lbl">Thâm niên</div><div class="input-wrap"><input type="text" class="money save only-num" id="pctn" ><span class="res-val" id="r_pctn"></span></div></td>
+                <td><div class="m-lbl">Soi kính</div><div class="input-wrap"><input type="text" class="money save only-num" id="pcsk"><span class="res-val" id="r_pcsk"></span></div></td>
+                <td><div class="m-lbl">Thâm niên</div><div class="input-wrap"><input type="text" class="money save only-num" id="pctn"><span class="res-val" id="r_pctn"></span></div></td>
                 <td><div class="m-lbl">ĐT</div><div class="input-wrap"><input type="text" class="money save only-num" id="pcdt"><span class="res-val" id="r_pcdt"></span></div></td>
-                <td><div class="m-lbl">Nhà ở</div><div class="input-wrap"><input type="text" class="money save only-num" id="pcno" ><span class="res-val" id="r_pcno"></span></div></td>
+                <td><div class="m-lbl">Nhà ở</div><div class="input-wrap"><input type="text" class="money save only-num" id="pcno"><span class="res-val" id="r_pcno"></span></div></td>
                 <td><div class="m-lbl">Đi lại</div><div class="input-wrap"><input type="text" class="money save only-num" id="pcdl"><span class="res-val" id="r_pcdl"></span></div></td>
-                <td><div class="m-lbl">C.Cần</div><div class="input-wrap"><input type="text" class="money save only-num" id="pccc" ><span class="res-val" id="r_pccc"></span></div></td>
+                <td><div class="m-lbl">C.Cần</div><div class="input-wrap"><input type="text" class="money save only-num" id="pccc"><span class="res-val" id="r_pccc"></span></div></td>
                 <td class="col-sum"><div class="m-lbl">Tổng Full</div><span id="tong1Full" style="font-weight:bold">0</span></td>
             </tr>
         </tbody>
@@ -210,7 +184,7 @@
                 <td><div class="m-lbl">Đêm CN</div><div class="input-wrap"><input type="text" class="save only-num-dot" id="g270"><span class="res-val" id="t270"></span></div></td>
                 <td><div class="m-lbl">Lễ 300%</div><div class="input-wrap"><input type="text" class="save only-num-dot" id="g300"><span class="res-val" id="t300"></span></div></td>
                 <td><div class="m-lbl">Đêm Lễ</div><div class="input-wrap"><input type="text" class="save only-num-dot" id="g390"><span class="res-val" id="t390"></span></div></td>
-                <td class="col-sum"><div class="m-lbl">Tổng T.Ca</div><span id="tong3" style="font-weight:bold">0</span></td>
+                <td class="col-sum"><div class="m-lbl">Tổng TC</div><span id="tong3" style="font-weight:bold">0</span></td>
             </tr>
         </tbody>
     </table>
@@ -235,7 +209,6 @@
 
 <script>
     const STORAGE_KEY_HISTORY = 'gigalane_history_data_v6';
-
     function fN(n) { return Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","); }
     function gV(id) { let el = document.getElementById(id); return el ? parseFloat(el.value.replace(/,/g,'')) || 0 : 0; }
 
@@ -243,26 +216,21 @@
         const chuan = gV('soCongChuan') || 26;
         const thuc = gV('soNgayGio');
         const tile = thuc / chuan;
-
         let lcb = gV('luongCB');
         let t1_Full = 0, t1_ThucTe = 0, t1_PC_ThucTe = 0;
         const list1 = ['luongCB','pccv','pckn','pcat','pcpccc','pcsk','pctn','pcdt','pcno','pcdl','pccc'];
-        
         list1.forEach(id => {
             let val = gV(id); t1_Full += val;
             let val_thuc = val * tile; t1_ThucTe += val_thuc;
             if(id !== 'luongCB') t1_PC_ThucTe += val_thuc;
             if(document.getElementById('r_'+id)) document.getElementById('r_'+id).innerText = fN(val_thuc);
         });
-
         document.getElementById('tong1Full').innerText = fN(t1_Full);
         document.getElementById('r_ngaycong').innerText = fN(lcb * tile);
         document.getElementById('top_tongPC').innerText = fN(t1_PC_ThucTe);
-
         const luongTC = lcb + gV('pccv') + gV('pckn') + gV('pctn') + gV('pcsk') + gV('pcno');
         const gioTC = luongTC / chuan / 8;
         document.getElementById('top_luongTC').innerText = fN(luongTC);
-
         const tcs = [{id:'g150',h:1.5,r:'t150'},{id:'g200',h:2,r:'t200'},{id:'g210',h:2.1,r:'t210'},{id:'g200cn',h:2,r:'t200cn'},{id:'g270',h:2.7,r:'t270'},{id:'g300',h:3,r:'t300'},{id:'g390',h:3.9,r:'t390'}];
         let t3 = 0;
         tcs.forEach(x => {
@@ -271,17 +239,14 @@
             t3 += money;
         });
         document.getElementById('tong3').innerText = fN(t3);
-
         let pnu = document.getElementById('chk_pnu').checked ? (gioTC * 2.25) : 0;
         document.getElementById('res_pnu').innerText = fN(pnu);
         let t2 = pnu + gV('tk') + gV('trenho') + gV('phepton') + gV('dcluong') + gV('th_da') + gV('th_khac') + gV('pc_an') + gV('pc_hoso');
         document.getElementById('tong2').innerText = fN(t2);
-
         const bh = (lcb + gV('pccv') + gV('pckn') + gV('pctn') + gV('pcsk')) * 0.105;
         document.getElementById('bhxh').innerText = fN(bh);
         let t4 = bh + 30000 + gV('trukhac');
         document.getElementById('tong4').innerText = fN(t4);
-
         document.getElementById('final_total_top').innerText = fN(t1_ThucTe + t2 + t3 - t4);
         save();
     }
@@ -289,16 +254,12 @@
     function saveMonthlyData() {
         const key = `Tháng ${document.getElementById('selMonth').value} - ${document.getElementById('selYear').value}`;
         let history = JSON.parse(localStorage.getItem(STORAGE_KEY_HISTORY) || '{}');
-        
-        if (history[key]) {
-            if (!confirm(`Dữ liệu của [${key}] đã tồn tại. Bạn có chắc chắn muốn GHI ĐÈ không?`)) return;
-        }
-
-        let currentData = {};
-        document.querySelectorAll('.save').forEach(e => { currentData[e.id] = (e.type === 'checkbox' ? e.checked : e.value); });
-        history[key] = currentData;
+        if (history[key] && !confirm(`Ghi đè [${key}]?`)) return;
+        let d = {};
+        document.querySelectorAll('.save').forEach(e => { d[e.id] = (e.type === 'checkbox' ? e.checked : e.value); });
+        history[key] = d;
         localStorage.setItem(STORAGE_KEY_HISTORY, JSON.stringify(history));
-        alert('Đã lưu thành công: ' + key);
+        alert('Đã lưu');
         updateHistoryList();
     }
 
