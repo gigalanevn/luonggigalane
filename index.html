@@ -80,6 +80,11 @@
 <body>
 
 <div class="container">
+   <!--  <div style="text-align: right; margin-bottom: 5px;">
+        <a href="https://s.shopee.vn/AAAUhiQ8ae" target="_blank" style="text-decoration: none; color: #1a73e8; font-weight: bold; font-size: 13px;">
+            Nhấn vào đây (link shoppe) khi có nhu cầu mua hàng trên shoppe (ấn vào, tìm thứ cần mua và mua hàng) để ủng hộ người làm phiếu lương, xin cảm ơn!
+        </a>
+    </div> -->
     <div class="main-header-title">PHIẾU LƯƠNG GIGALANE</div>
 
     <div class="guide-box">
@@ -113,18 +118,18 @@
     </div>
     
     <div class="info-bar">
-        <div>Công tính TC: <input type="text" id="soCongChuan" value="26" class="save only-num-dot input-small"></div>
+        <div>Công tính tăng ca: <input type="text" id="soCongChuan" value="26" class="save only-num-dot input-small"></div>
         <div>Công thực tế: <input type="text" id="soNgayGio" value="26" class="save only-num-dot input-small"></div>
         <div>Lương ngày công: <span id="r_ngaycong" style="color:var(--blue-main)">0</span></div>
-        <div>Tổng Phụ cấp: <span id="top_tongPC" style="color:var(--blue-main)">0</span></div>
-        <div>Lương Tính tăng ca: <span id="top_luongTC" style="color:var(--blue-main)">0</span></div>
+        <div>Tổng phụ cấp: <span id="top_tongPC" style="color:var(--blue-main)">0</span></div>
+        <div>Lương tính tăng ca: <span id="top_luongTC" style="color:var(--blue-main)">0</span></div>
     </div>
 
     <table>
         <thead>
             <tr class="section-head"><th colspan="12">1. THÔNG TIN LƯƠNG</th></tr>
             <tr class="col-gray">
-                <th>Lương CB</th><th>Chức vụ</th><th>Kỹ năng</th><th>ATVSV</th><th>PCCC</th><th>Soi kính</th><th>Thâm niên</th><th>ĐT</th><th>Nhà ở</th><th>Đi lại</th><th>C.Cần</th><th class="col-sum">Tổng (1)</th>
+                <th>Lương CB</th><th>Chức vụ</th><th>Kỹ năng</th><th>ATVSV</th><th>PCCC</th><th>Soi kính</th><th>Thâm niên</th><th>ĐT</th><th>Nhà ở</th><th>Đi lại</th><th>C.Cần</th><th class="col-sum">Tổng lương</th>
             </tr>
         </thead>
         <tbody>
@@ -140,7 +145,7 @@
                 <td><div class="m-lbl">Nhà ở</div><div class="input-wrap"><input type="text" class="money save only-num" id="pcno"><span class="res-val" id="r_pcno"></span></div></td>
                 <td><div class="m-lbl">Đi lại</div><div class="input-wrap"><input type="text" class="money save only-num" id="pcdl"><span class="res-val" id="r_pcdl"></span></div></td>
                 <td><div class="m-lbl">C.Cần</div><div class="input-wrap"><input type="text" class="money save only-num" id="pccc"><span class="res-val" id="r_pccc"></span></div></td>
-                <td class="col-sum"><div class="m-lbl">Tổng Full</div><span id="tong1Full" style="font-weight:bold">0</span></td>
+                <td class="col-sum"><div class="m-lbl">  </div><span id="tong1Full" style="font-weight:bold">0</span></td>
             </tr>
         </tbody>
     </table>
@@ -149,7 +154,7 @@
         <thead>
             <tr class="section-head"><th colspan="10">2. KHOẢN THU KHÁC</th></tr>
             <tr class="col-gray">
-                <th>Thưởng</th><th>Trẻ nhỏ</th><th>Phép tồn</th><th>Đ/C Lương</th><th>Thưởng ĐA</th><th>Thưởng khác</th><th>PC Ăn</th><th>PC Hồ sơ</th><th>PNữ</th><th class="col-sum">Tổng (2)</th>
+                <th>Thưởng</th><th>Trẻ nhỏ</th><th>Phép tồn</th><th>Đ/C Lương</th><th>Thưởng ĐA</th><th>Thưởng khác</th><th>PC Ăn</th><th>PC Hồ sơ</th><th>PNữ</th><th class="col-sum">Tổng khoản thu khác</th>
             </tr>
         </thead>
         <tbody>
@@ -163,7 +168,7 @@
                 <td><div class="m-lbl">Bữa ăn</div><div class="input-wrap"><input type="text" class="money save only-num" id="pc_an"></div></td>
                 <td><div class="m-lbl">Hồ sơ</div><div class="input-wrap"><input type="text" class="money save only-num" id="pc_hoso"></div></td>
                 <td><div class="m-lbl">Phụ nữ</div><div class="input-wrap"><input type="checkbox" id="chk_pnu" class="save chk-box" onchange="calculateAll()" checked><span class="res-val" id="res_pnu">0</span></div></td>
-                <td class="col-sum"><div class="m-lbl">Tổng (2)</div><span id="tong2" style="font-weight:bold">0</span></td>
+                <td class="col-sum"><div class="m-lbl">  </div><span id="tong2" style="font-weight:bold">0</span></td>
             </tr>
         </tbody>
     </table>
@@ -172,7 +177,7 @@
         <thead>
             <tr class="section-head"><th colspan="8">3. TĂNG CA (NHẬP SỐ GIỜ)</th></tr>
             <tr class="col-gray">
-                <th>150%</th><th>Đêm 200%</th><th>22h 210%</th><th>CN 200%</th><th>Đêm CN 270%</th><th>Lễ 300%</th><th>Đêm Lễ 390%</th><th class="col-sum">Tổng (3)</th>
+                <th>150%</th><th>Đêm 200%</th><th>22h 210%</th><th>CN 200%</th><th>Đêm CN 270%</th><th>Lễ 300%</th><th>Đêm Lễ 390%</th><th class="col-sum">Tổng tăng ca</th>
             </tr>
         </thead>
         <tbody>
@@ -184,7 +189,7 @@
                 <td><div class="m-lbl">Đêm CN</div><div class="input-wrap"><input type="text" class="save only-num-dot" id="g270"><span class="res-val" id="t270"></span></div></td>
                 <td><div class="m-lbl">Lễ 300%</div><div class="input-wrap"><input type="text" class="save only-num-dot" id="g300"><span class="res-val" id="t300"></span></div></td>
                 <td><div class="m-lbl">Đêm Lễ</div><div class="input-wrap"><input type="text" class="save only-num-dot" id="g390"><span class="res-val" id="t390"></span></div></td>
-                <td class="col-sum"><div class="m-lbl">Tổng TC</div><span id="tong3" style="font-weight:bold">0</span></td>
+                <td class="col-sum"><div class="m-lbl"> </div><span id="tong3" style="font-weight:bold">0</span></td>
             </tr>
         </tbody>
     </table>
@@ -193,7 +198,7 @@
         <thead>
             <tr class="section-head"><th colspan="4">4. GIẢM TRỪ</th></tr>
             <tr class="col-gray">
-                <th>BHXH (10.5%)</th><th>Công đoàn</th><th>Trừ khác</th><th class="col-sum">Tổng (4)</th>
+                <th>BHXH (10.5%)</th><th>Công đoàn</th><th>Trừ khác</th><th class="col-sum">Các khoản trừ</th>
             </tr>
         </thead>
         <tbody>
@@ -201,7 +206,7 @@
                 <td><div class="m-lbl">BHXH</div><div class="input-wrap" id="bhxh" style="color:red; font-weight:bold">0</div></td>
                 <td><div class="m-lbl">Công đoàn</div><div class="input-wrap">30,000</div></td>
                 <td><div class="m-lbl">Trừ khác</div><div class="input-wrap"><input type="text" class="money save only-num" id="trukhac" style="color:red"></div></td>
-                <td class="col-sum"><div class="m-lbl">Tổng Trừ</div><span id="tong4" style="font-weight:bold">0</span></td>
+                <td class="col-sum"><div class="m-lbl"></div><span id="tong4" style="font-weight:bold">0</span></td>
             </tr>
         </tbody>
     </table>
