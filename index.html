@@ -88,17 +88,17 @@
     <div class="main-header-title">PHIẾU LƯƠNG GIGALANE</div>
 
     <div class="guide-box">
-        <b>💡 Hướng dẫn:</b> 1. Chọn <b>Tháng/Năm</b> | 2. Mục 1 Nhập lương và trợ cấp (chỉ nhập lần đầu) | 3. Mục 2 nhập các khoản thu, nếu là <b>NAM</b> bỏ tick PNữ | 4. Nhập số <b>giờ</b> tăng ca (nếu lẻ dùng dấu <b>.</b> ví dụ 10.5 ) | 5. Nhấn <b>Lưu</b> để lưu vào lịch sử.
+        <b>💡 Hướng dẫn:</b> 1. Chọn <b>Tháng/Năm</b> , nhập số <b>công thực tế</b> | 2. Mục 1 Nhập lương và trợ cấp (chỉ nhập lần đầu) | 3. Mục 2 nhập các khoản thu, nếu là <b>NAM</b> bỏ tick PNữ | 4. Nhập số <b>giờ</b> tăng ca (nếu lẻ dùng dấu <b>.</b> ví dụ 10.5 ) | 5. Nhấn <b>Lưu</b> để lưu vào lịch sử.
     </div>
 
     <div class="header-top">
         <div class="header-left">
             <div><label>HỌ TÊN:</label> <input type="text" id="userName" placeholder="Nhập tên..." class="input-name save"></div>
             <div>
-                <select id="selMonth" class="select-date save" onchange="calculateAll()">
+                <select id="selMonth" class="select-date save" onchange="updateCongChuan(); calculateAll()">
                     <script>for(let i=1; i<=12; i++) document.write(`<option value="${i}">Tháng ${i}</option>`)</script>
                 </select>
-                <select id="selYear" class="select-date save" onchange="calculateAll()">
+                <select id="selYear" class="select-date save" onchange="updateCongChuan(); calculateAll()">
                     <script>for(let i=2025; i<=2035; i++) document.write(`<option value="${i}">Năm ${i}</option>`)</script>
                 </select>
             </div>
@@ -118,7 +118,7 @@
     </div>
     
     <div class="info-bar">
-        <div>Công tính tăng ca: <input type="text" id="soCongChuan" value="26" class="save only-num-dot input-small"></div>
+        <div>Công tính tăng ca: <input type="text" id="soCongChuan" value="26" class="save only-num-dot input-small" readonly style="background-color: #eee; cursor: not-allowed;"></div>
         <div>Công thực tế: <input type="text" id="soNgayGio" value="26" class="save only-num-dot input-small"></div>
         <div>Lương ngày công: <span id="r_ngaycong" style="color:var(--blue-main)">0</span></div>
         <div>Tổng phụ cấp: <span id="top_tongPC" style="color:var(--blue-main)">0</span></div>
@@ -213,9 +213,33 @@
 </div>
 
 <script>
+
     const STORAGE_KEY_HISTORY = 'gigalane_history_data_v6';
     function fN(n) { return Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","); }
     function gV(id) { let el = document.getElementById(id); return el ? parseFloat(el.value.replace(/,/g,'')) || 0 : 0; }
+
+function updateCongChuan() {
+    const month = parseInt(document.getElementById('selMonth').value);
+    const year = parseInt(document.getElementById('selYear').value);
+    
+    // Tính tổng số ngày trong tháng
+    let totalDays = new Date(year, month, 0).getDate();
+    let countWorkDays = 0;
+
+    // Đếm các ngày không phải Chủ Nhật
+    for (let d = 1; d <= totalDays; d++) {
+        let dayOfWeek = new Date(year, month - 1, d).getDay();
+        if (dayOfWeek !== 0) { // 0 là Chủ Nhật
+            countWorkDays++;
+        }
+    }
+
+    // Quy tắc: Nếu > 26 thì lấy 26, nếu nhỏ hơn thì lấy thực tế
+    let finalCongChuan = countWorkDays > 26 ? 26 : countWorkDays;
+    
+    // Cập nhật vào ô input
+    document.getElementById('soCongChuan').value = finalCongChuan;
+}
 
     function calculateAll() {
         const chuan = gV('soCongChuan') || 26;
@@ -323,7 +347,13 @@
         calculateAll();
     });
 
-    window.onload = () => { updateHistoryList(); load(); };
+    window.onload = () => { 
+    updateHistoryList(); 
+    load(); 
+    updateCongChuan(); // Thêm dòng này
+    calculateAll(); 
+};
 </script>
 </body>
 </html>
+
