@@ -98,15 +98,28 @@
                 <select id="selMonth" class="select-date save" onchange="updateCongChuan(); calculateAll()">
                     <script>for(let i=1; i<=12; i++) document.write(`<option value="${i}">Tháng ${i}</option>`)</script>
                 </select>
-                <select id="selYear" class="select-date save" onchange="updateCongChuan(); calculateAll()">
+                <!-- <select id="selYear" class="select-date save" onchange="updateCongChuan(); calculateAll(); calculateYearTotal();"> -->
+                    <select id="selYear" class="select-date save" onchange="document.getElementById('show_year_total').checked = false; toggleYearTotal(); updateCongChuan(); calculateAll();">
                     <script>for(let i=2025; i<=2035; i++) document.write(`<option value="${i}">Năm ${i}</option>`)</script>
                 </select>
             </div>
         </div>
         <div class="top-final-box">
             <span class="top-final-label">THỰC LĨNH:</span>
+
             <span class="top-final-val" id="final_total_top">0</span>
+
         </div>
+  <div class="top-final-box" style="margin-left: 10px; border-color: #28a745; display: flex; align-items: center; gap: 8px;">
+    <input type="checkbox" id="show_year_total" onchange="toggleYearTotal()" style="width: 18px; height: 18px; cursor: pointer;">
+    
+    <div id="year_total_content" style="display: none; align-items: center;">
+        <span class="top-final-label" style="color: #1b5e20; font-size: 14px; margin-right: 5px;">TỔNG THỰC NHẬN CẢ NĂM:</span>
+        <span class="top-final-val" id="year_total" style="color: #2e7d32; font-size: 22px;">0</span>
+    </div>
+    
+    <span id="year_total_placeholder" style="color: #666; font-size: 12px; font-style: italic;">Hiện tổng thực nhận cả năm</span>
+</div>
     </div>
 
     <div class="storage-bar">
@@ -211,8 +224,16 @@
         </tbody>
     </table>
 </div>
-
+<<div style="margin-top: 20px; padding: 15px; background: #fffde7; border: 2px dashed #fbc02d; border-radius: 10px; text-align: center;">
+    <span style="font-size: 16px; font-weight: bold; color: #333;">TỔNG THỰC LĨNH THÁNG <span id="footer_month">...</span>:</span>
+    <div id="final_total_footer" style="font-size: 35px; font-weight: bold; color: #b71c1c; margin-top: 5px;">0</div>
+    <div style="font-size: 12px; color: #777; font-style: italic;">(Vui lòng kiểm tra kỹ các khoản trước khi lưu)</div>
+</div>
+<div style="text-align: center; margin-top: 20px; font-size: 13px; color: #666;">
+    👁️ Visit: <span id="visit_count">...</span>
+</div>
 <script>
+    
 
     const STORAGE_KEY_HISTORY = 'gigalane_history_data_v6';
     function fN(n) { return Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","); }
@@ -277,20 +298,29 @@ function updateCongChuan() {
         let t4 = bh + 30000 + gV('trukhac');
         document.getElementById('tong4').innerText = fN(t4);
         document.getElementById('final_total_top').innerText = fN(t1_ThucTe + t2 + t3 - t4);
+        // Cập nhật số tiền xuống dưới chân trang
+document.getElementById('final_total_footer').innerText = fN(t1_ThucTe + t2 + t3 - t4);
+
+// Cập nhật số tháng hiển thị dưới chân trang
+document.getElementById('footer_month').innerText = document.getElementById('selMonth').value;
         save();
     }
 
-    function saveMonthlyData() {
-        const key = `Tháng ${document.getElementById('selMonth').value} - ${document.getElementById('selYear').value}`;
-        let history = JSON.parse(localStorage.getItem(STORAGE_KEY_HISTORY) || '{}');
-        if (history[key] && !confirm(`Ghi đè [${key}]?`)) return;
-        let d = {};
-        document.querySelectorAll('.save').forEach(e => { d[e.id] = (e.type === 'checkbox' ? e.checked : e.value); });
-        history[key] = d;
-        localStorage.setItem(STORAGE_KEY_HISTORY, JSON.stringify(history));
-        alert('Đã lưu');
-        updateHistoryList();
-    }
+function saveMonthlyData() {
+    const key = `Tháng ${document.getElementById('selMonth').value} - ${document.getElementById('selYear').value}`;
+    let history = JSON.parse(localStorage.getItem(STORAGE_KEY_HISTORY) || '{}');
+    if (history[key] && !confirm(`Ghi đè [${key}]?`)) return;
+    
+    let d = {};
+    document.querySelectorAll('.save').forEach(e => { d[e.id] = (e.type === 'checkbox' ? e.checked : e.value); });
+    history[key] = d;
+    localStorage.setItem(STORAGE_KEY_HISTORY, JSON.stringify(history));
+    
+    alert('Đã lưu');
+    updateHistoryList(); 
+    document.getElementById('historySelect').value = key; // Thêm dòng này
+    calculateYearTotal(); 
+}
 
     function updateHistoryList() {
         const select = document.getElementById('historySelect');
@@ -322,7 +352,29 @@ function updateCongChuan() {
         localStorage.setItem('salary_gigalane_2025_v6', JSON.stringify(d));
     }
 
-    function load() {
+function load() {
+    // 1. Lấy tháng và năm đang hiển thị trên màn hình
+    const month = document.getElementById('selMonth').value;
+    const year = document.getElementById('selYear').value;
+    const historyKey = `Tháng ${month} - ${year}`;
+    
+    const history = JSON.parse(localStorage.getItem(STORAGE_KEY_HISTORY) || '{}');
+    const historySelect = document.getElementById('historySelect');
+
+    // 2. Kiểm tra nếu tháng này đã được lưu trong lịch sử
+    if (history[historyKey]) {
+        historySelect.value = historyKey; // Tự động chọn tháng đó trong danh sách Lịch sử
+        const data = history[historyKey];
+        for (let id in data) {
+            let e = document.getElementById(id);
+            if (e) { 
+                if (e.type === 'checkbox') e.checked = data[id]; 
+                else e.value = data[id]; 
+            }
+        }
+    } else {
+        // Nếu chưa có trong lịch sử, quay về chế độ "Đang nhập" và load dữ liệu nháp (nếu có)
+        historySelect.value = 'current';
         const d = JSON.parse(localStorage.getItem('salary_gigalane_2025_v6'));
         if(d) {
             for (let k in d) {
@@ -330,8 +382,10 @@ function updateCongChuan() {
                 if(e) { if(e.type === 'checkbox') e.checked = d[k]; else e.value = d[k]; }
             }
         }
-        calculateAll();
     }
+    calculateAll();
+    if(typeof calculateYearTotal === 'function') calculateYearTotal();
+}
 
     document.addEventListener('input', (e) => {
         if(e.target.classList.contains('only-num')) e.target.value = e.target.value.replace(/[^0-9]/g, '');
@@ -347,11 +401,114 @@ function updateCongChuan() {
         calculateAll();
     });
 
-    window.onload = () => { 
+window.onload = () => {
+    // 1. Lấy ngày tháng hiện tại từ hệ thống máy tính
+    const now = new Date();
+    const currentMonth = now.getMonth() + 1;
+    const currentYear = now.getFullYear();
+
+    // 2. Gán vào ô chọn Tháng và Năm trước để làm gốc
+    document.getElementById('selMonth').value = currentMonth;
+    document.getElementById('selYear').value = currentYear;
+
+    // 3. Cập nhật danh sách Lịch sử (phải chạy cái này trước khi load)
     updateHistoryList(); 
+
+    // 4. Tính công chuẩn cho tháng hiện tại
+    updateCongChuan();
+
+    // 5. Hàm load() mới (đã sửa ở bước trước) sẽ tự kiểm tra:
+    // Nếu "Tháng X - Năm Y" có trong lịch sử -> chọn nó.
+    // Nếu không -> để mặc định "-- Đang nhập --".
     load(); 
-    updateCongChuan(); // Thêm dòng này
-    calculateAll(); 
+
+    // 6. Tính toán lại toàn bộ và tổng năm
+    calculateAll();
+    if (typeof calculateYearTotal === 'function') {
+        calculateYearTotal();
+    }
+};
+function calculateYearTotal() {
+    if (!document.getElementById('show_year_total').checked) return;
+    const history = JSON.parse(localStorage.getItem(STORAGE_KEY_HISTORY) || '{}');
+    const selectedYear = document.getElementById('selYear').value;
+    let totalYear = 0;
+
+    for (let key in history) {
+        // Chỉ tính những bản ghi thuộc năm đang chọn
+        if (key.includes(selectedYear)) {
+            const d = history[key];
+            
+            // Chuyển đổi dữ liệu sang số, nếu rỗng thì bằng 0
+            const n = (id) => parseFloat(String(d[id] || '0').replace(/,/g, '')) || 0;
+
+            // KIỂM TRA: Nếu tháng đó không có Lương CB thì bỏ qua (tránh số âm do chỉ trừ BHXH)
+            if (n('luongCB') <= 0) continue;
+
+            const chuan = n('soCongChuan') || 26;
+            const thuc = n('soNgayGio') || 0;
+            const tile = thuc / chuan;
+
+            // 1. Thu nhập theo công thực tế
+            let t1_thuc = 0;
+            const list1 = ['luongCB','pccv','pckn','pcat','pcpccc','pcsk','pctn','pcdt','pcno','pcdl','pccc'];
+            list1.forEach(id => { t1_thuc += n(id) * tile; });
+
+            // 2. Tính lương tăng ca
+            const luongTC = n('luongCB') + n('pccv') + n('pckn') + n('pctn') + n('pcsk') + n('pcno');
+            const gioTC = luongTC / chuan / 8;
+            let t3 = (n('g150')*1.5 + n('g200')*2 + n('g210')*2.1 + n('g200cn')*2 + n('g270')*2.7 + n('g300')*3 + n('g390')*3.9) * gioTC;
+
+            // 3. Khoản thu khác
+            let pnu = d.chk_pnu ? (gioTC * 2.25) : 0;
+            let t2 = pnu + n('tk') + n('trenho') + n('phepton') + n('dcluong') + n('th_da') + n('th_khac') + n('pc_an') + n('pc_hoso');
+
+            // 4. Các khoản giảm trừ
+            const bh = (n('luongCB') + n('pccv') + n('pckn') + n('pctn') + n('pcsk')) * 0.105;
+            let t4 = bh + 30000 + n('trukhac');
+
+            // Cộng dồn vào tổng năm
+            totalYear += (t1_thuc + t2 + t3 - t4);
+        }
+    }
+    
+    // Hiển thị kết quả lên màn hình
+    const element = document.getElementById('year_total');
+    if(element) element.innerText = fN(totalYear);
+
+}
+function toggleYearTotal() {
+    const isChecked = document.getElementById('show_year_total').checked;
+    const content = document.getElementById('year_total_content');
+    const placeholder = document.getElementById('year_total_placeholder');
+
+    if (isChecked) {
+        content.style.display = 'flex';      // Hiện số tiền
+        placeholder.style.display = 'none';   // Ẩn chữ gợi ý
+        calculateYearTotal();                // Tính toán lại số liệu cho mới nhất
+    } else {
+        content.style.display = 'none';      // Ẩn số tiền
+        placeholder.style.display = 'inline'; // Hiện chữ gợi ý
+    }
+}
+function updateVisitCount() {
+    // Sử dụng dịch vụ countapi-key (miễn phí và không cần đăng ký)
+    // Lưu ý: Thay 'gigalane_salary_v6' bằng một cái tên riêng biệt của bạn
+    fetch('https://api.countapi.xyz/hit/gigalane_salary_v6/visits')
+        .then(res => res.json())
+        .then(res => {
+            document.getElementById('visit_count').innerText = res.value;
+        })
+        .catch(err => {
+            document.getElementById('visit_count').innerText = "N/A";
+        });
+}
+
+// Gọi hàm này trong window.onload
+// Sửa window.onload của bạn thêm dòng này:
+window.onload = () => {
+    // ... các hàm cũ của bạn ...
+    updateVisitCount(); 
 };
 </script>
 </body>
