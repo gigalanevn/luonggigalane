@@ -95,11 +95,11 @@
         <div class="header-left">
             <div><label>HỌ TÊN:</label> <input type="text" id="userName" placeholder="Nhập tên..." class="input-name save"></div>
             <div>
-                <select id="selMonth" class="select-date save" onchange="updateCongChuan(); load(); calculateAll()">
+                <select id="selMonth" class="select-date save" onchange="updateCongChuan(); load();">
                     <script>for(let i=1; i<=12; i++) document.write(`<option value="${i}">Tháng ${i}</option>`)</script>
                 </select>
                 <!-- <select id="selYear" class="select-date save" onchange="updateCongChuan(); calculateAll(); calculateYearTotal();"> -->
-                    <select id="selYear" class="select-date save" onchange="document.getElementById('show_year_total').checked = false; toggleYearTotal(); updateCongChuan(); load(); calculateAll();">
+                   <select id="selYear" class="select-date save" onchange="document.getElementById('show_year_total').checked = false; toggleYearTotal(); updateCongChuan(); load();">
                     <script>for(let i=2025; i<=2035; i++) document.write(`<option value="${i}">Năm ${i}</option>`)</script>
                 </select>
             </div>
@@ -224,7 +224,7 @@
         </tbody>
     </table>
 </div>
-<<div style="margin-top: 20px; padding: 15px; background: #fffde7; border: 2px dashed #fbc02d; border-radius: 10px; text-align: center;">
+<div style="margin-top: 20px; padding: 15px; background: #fffde7; border: 2px dashed #fbc02d; border-radius: 10px; text-align: center;">
     <span style="font-size: 16px; font-weight: bold; color: #333;">TỔNG THỰC LĨNH THÁNG <span id="footer_month">...</span>:</span>
     <div id="final_total_footer" style="font-size: 35px; font-weight: bold; color: #b71c1c; margin-top: 5px;">0</div>
     <div style="font-size: 12px; color: #777; font-style: italic;">(Vui lòng kiểm tra kỹ các khoản trước khi lưu)</div>
@@ -413,31 +413,25 @@ function load() {
     });
 
 window.onload = () => {
-    // 1. Lấy ngày tháng hiện tại từ hệ thống máy tính
+    // 1. Thiết lập ngày tháng hiện tại
     const now = new Date();
-    const currentMonth = now.getMonth() + 1;
-    const currentYear = now.getFullYear();
+    document.getElementById('selMonth').value = now.getMonth() + 1;
+    document.getElementById('selYear').value = now.getFullYear();
 
-    // 2. Gán vào ô chọn Tháng và Năm trước để làm gốc
-    document.getElementById('selMonth').value = currentMonth;
-    document.getElementById('selYear').value = currentYear;
-
-    // 3. Cập nhật danh sách Lịch sử (phải chạy cái này trước khi load)
+    // 2. Cập nhật danh sách "thực đơn" lịch sử
     updateHistoryList(); 
 
-    // 4. Tính công chuẩn cho tháng hiện tại
+    // 3. Tính công chuẩn cho tháng này
     updateCongChuan();
 
-    // 5. Hàm load() mới (đã sửa ở bước trước) sẽ tự kiểm tra:
-    // Nếu "Tháng X - Năm Y" có trong lịch sử -> chọn nó.
-    // Nếu không -> để mặc định "-- Đang nhập --".
+    // 4. Tìm và load dữ liệu nếu tháng này đã từng lưu
     load(); 
 
-    // 6. Tính toán lại toàn bộ và tổng năm
-    calculateAll();
-    if (typeof calculateYearTotal === 'function') {
-        calculateYearTotal();
-    }
+    // 5. Cập nhật lượt truy cập (Sử dụng bộ đếm cá nhân thay cho API lỗi)
+    let visits = localStorage.getItem('personal_visits') || 0;
+    visits++;
+    localStorage.setItem('personal_visits', visits);
+    document.getElementById('visit_count').innerText = visits;
 };
 function calculateYearTotal() {
     if (!document.getElementById('show_year_total').checked) return;
@@ -517,10 +511,10 @@ function updateVisitCount() {
 
 // Gọi hàm này trong window.onload
 // Sửa window.onload của bạn thêm dòng này:
-window.onload = () => {
-    // ... các hàm cũ của bạn ...
-    updateVisitCount(); 
-};
+// window.onload = () => {
+//     // ... các hàm cũ của bạn ...
+//     updateVisitCount(); 
+// };
 </script>
 </body>
 </html>
