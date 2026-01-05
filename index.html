@@ -238,17 +238,132 @@
     <div id="final_total_footer" style="font-size: 35px; font-weight: bold; color: #b71c1c; margin-top: 5px;">0</div>
     <!-- <div style="font-size: 12px; color: #777; font-style: italic;">(Vui lòng kiểm tra kỹ các khoản trước khi lưu)</div> -->
 </div>
-<div style="text-align: center; margin-top: 20px; font-size: 13px; color: #666;">
-    👁️ Visit: <span id="visit_count">...</span>
+<div style="text-align: center; margin-top: 30px; padding: 20px; border-top: 1px solid #eee;">
+    <p style="font-size: 0.9em; color: #666; margin-bottom: 10px;">Visit:</p>
+    <img src="https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2Fgigalanevn%2Fluonggigalane&count_bg=%2379C83D&title_bg=%23555555&icon=&icon_color=%23E7E7E7&title=Luot+xem&edge_flat=false" alt="Hits"/>
 </div>
 <script>
-const STORAGE_KEY_HISTORY = 'gigalane_history_data_v6';
-const DRAFT_KEY = 'gigalane_draft_data';
+   const STORAGE_KEY_HISTORY = 'gigalane_history_data_v6';
+const DRAFT_KEY = 'gigalane_draft_v7'; 
+const VISIT_KEY = 'gigalane_visit_count';
 
 function fN(n) { return Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","); }
 function gV(id) { let el = document.getElementById(id); return el ? parseFloat(el.value.replace(/,/g,'')) || 0 : 0; }
 
-// --- HÀM LƯU NHÁP TỰ ĐỘNG ---
+// --- 1. XỬ LÝ LƯỢT TRUY CẬP ---
+function updateVisitCount() {
+    let visits = parseInt(localStorage.getItem(VISIT_KEY) || '0');
+    visits++;
+    localStorage.setItem(VISIT_KEY, visits);
+    if(document.getElementById('visit_count')) document.getElementById('visit_count').innerText = visits.toLocaleString();
+}
+
+// --- 2. TÍNH TỔNG CẢ NĂM (QUAN TRỌNG) ---
+function toggleYearTotal() {
+    const isChecked = document.getElementById('show_year_total').checked;
+    document.getElementById('year_total_content').style.display = isChecked ? 'flex' : 'none';
+    document.getElementById('year_total_placeholder').style.display = isChecked ? 'none' : 'inline';
+    if (isChecked) calculateYearTotal();
+}
+
+function calculateYearTotal() {
+    const history = JSON.parse(localStorage.getItem(STORAGE_KEY_HISTORY) || '{}');
+    const selectedYear = document.getElementById('selYear').value;
+    const currentName = document.getElementById('userName').value.trim().toUpperCase();
+    let totalYear = 0;
+
+    if (!currentName) {
+        document.getElementById('year_total').innerText = "0";
+        return;
+    }
+
+    for (let key in history) {
+        // Chỉ cộng dồn nếu Tên khớp và Năm khớp trong Lịch sử
+        if (key.startsWith(currentName + " -") && key.endsWith(" - " + selectedYear)) {
+            const d = history[key];
+            const getV = (id) => parseFloat(String(d[id] || '0').replace(/,/g, '')) || 0;
+            
+            const chuan = getV('soCongChuan') || 26;
+            const thuc = getV('soNgayGio') || 0;
+            const tile = thuc / chuan;
+
+            // Tính toán thực lĩnh của tháng đó trong lịch sử
+            let t1_thuc = 0;
+            ['luongCB','pccv','pckn','pcat','pcpccc','pcsk','pctn','pcdt','pcno','pcdl','pccc'].forEach(id => {
+                t1_thuc += getV(id) * tile;
+            });
+
+            const luongTC = getV('luongCB') + getV('pccv') + getV('pckn') + getV('pctn') + getV('pcsk') + getV('pcno');
+            const gia1Gio = luongTC / chuan / 8;
+            let t3 = (getV('g150')*1.5 + getV('g200')*2 + getV('g210')*2.1 + getV('g200cn')*2 + getV('g270')*2.7 + getV('g300')*3 + getV('g390')*3.9) * gia1Gio;
+            let pnu = d.chk_pnu ? (gia1Gio * 2.25) : 0;
+            let t2 = pnu + getV('tk') + getV('trenho') + getV('phepton') + getV('dcluong') + getV('th_da') + getV('th_khac') + getV('pc_an') + getV('pc_hoso');
+            const bh = (getV('luongCB') + getV('pccv') + getV('pckn') + getV('pctn') + getV('pcsk')) * 0.105;
+            
+            totalYear += (t1_thuc + t2 + t3 - (bh + 30000 + getV('trukhac')));
+        }
+    }
+    document.getElementById('year_total').innerText = fN(totalYear);
+}
+
+// --- 3. TÍNH TOÁN CHI TIẾT THÁNG ---
+function calculateAll() {
+    const chuan = gV('soCongChuan') || 26;
+    const thuc = gV('soNgayGio');
+    const tile = thuc / chuan;
+    const lcb = gV('luongCB');
+    
+    let tong1LyThuyet = 0;
+    let tongPCThucTe = 0;
+    let tongThucTeMuc1 = 0;
+
+    const list1 = ['luongCB','pccv','pckn','pcat','pcpccc','pcsk','pctn','pcdt','pcno','pcdl','pccc'];
+    list1.forEach(id => {
+        let giaTriGoc = gV(id); 
+        tong1LyThuyet += giaTriGoc;
+        let giaTriThucTe = giaTriGoc * tile;
+        tongThucTeMuc1 += giaTriThucTe;
+        if (id !== 'luongCB') tongPCThucTe += giaTriThucTe;
+        if(document.getElementById('r_'+id)) document.getElementById('r_'+id).innerText = fN(giaTriThucTe);
+    });
+
+    document.getElementById('tong1Full').innerText = fN(tong1LyThuyet);
+    document.getElementById('top_tongPC').innerText = fN(tongPCThucTe); 
+    document.getElementById('r_ngaycong').innerText = fN(lcb * tile);
+
+    const luongGocTinhTC = lcb + gV('pccv') + gV('pckn') + gV('pctn') + gV('pcsk') + gV('pcno');
+    document.getElementById('top_luongTC').innerText = fN(luongGocTinhTC);
+    const gia1Gio = luongGocTinhTC / chuan / 8;
+    
+    let tongTienTC = 0;
+    const tcs = [{id:'g150',h:1.5,r:'t150'},{id:'g200',h:2,r:'t200'},{id:'g210',h:2.1,r:'t210'},{id:'g200cn',h:2,r:'t200cn'},{id:'g270',h:2.7,r:'t270'},{id:'g300',h:3,r:'t300'},{id:'g390',h:3.9,r:'t390'}];
+    tcs.forEach(x => {
+        let m = gV(x.id) * gia1Gio * x.h;
+        if(document.getElementById(x.r)) document.getElementById(x.r).innerText = fN(m);
+        tongTienTC += m;
+    });
+
+    let pnu = document.getElementById('chk_pnu').checked ? (gia1Gio * 2.25) : 0;
+    document.getElementById('res_pnu').innerText = fN(pnu);
+    let t2 = pnu + gV('tk') + gV('trenho') + gV('phepton') + gV('dcluong') + gV('th_da') + gV('th_khac') + gV('pc_an') + gV('pc_hoso');
+    const bh = (lcb + gV('pccv') + gV('pckn') + gV('pctn') + gV('pcsk')) * 0.105;
+    const tongGiamTru = bh + 30000 + gV('trukhac');
+
+    let final = tongThucTeMuc1 + t2 + tongTienTC - tongGiamTru;
+
+    document.getElementById('final_total_top').innerText = fN(final);
+    document.getElementById('final_total_footer').innerText = fN(final);
+    document.getElementById('bhxh').innerText = fN(bh);
+    document.getElementById('tong2').innerText = fN(t2);
+    document.getElementById('tong3').innerText = fN(tongTienTC);
+    document.getElementById('tong4').innerText = fN(tongGiamTru);
+    document.getElementById('footer_month').innerText = document.getElementById('selMonth').value;
+
+    saveDraft(); 
+    if(document.getElementById('show_year_total').checked) calculateYearTotal();
+}
+
+// --- 4. CÁC HÀM HỆ THỐNG ---
 function saveDraft() {
     const d = {};
     document.querySelectorAll('.save').forEach(e => {
@@ -257,185 +372,86 @@ function saveDraft() {
     localStorage.setItem(DRAFT_KEY, JSON.stringify(d));
 }
 
-function updateCongChuan() {
-    const month = parseInt(document.getElementById('selMonth').value);
-    const year = parseInt(document.getElementById('selYear').value);
-    let totalDays = new Date(year, month, 0).getDate();
-    let countWorkDays = 0;
-    for (let d = 1; d <= totalDays; d++) {
-        let dayOfWeek = new Date(year, month - 1, d).getDay();
-        if (dayOfWeek !== 0) countWorkDays++;
-    }
-    let finalCongChuan = countWorkDays > 26 ? 26 : countWorkDays;
-    document.getElementById('soCongChuan').value = finalCongChuan;
-}
-
-function calculateAll() {
-    const chuan = gV('soCongChuan') || 26;
-    const thuc = gV('soNgayGio');
-    const tile = thuc / chuan;
-    let lcb = gV('luongCB');
-    let t1_Full = 0, t1_ThucTe = 0, t1_PC_ThucTe = 0;
-    const list1 = ['luongCB','pccv','pckn','pcat','pcpccc','pcsk','pctn','pcdt','pcno','pcdl','pccc'];
-    
-    list1.forEach(id => {
-        let val = gV(id); t1_Full += val;
-        let val_thuc = val * tile; t1_ThucTe += val_thuc;
-        if(id !== 'luongCB') t1_PC_ThucTe += val_thuc;
-        if(document.getElementById('r_'+id)) document.getElementById('r_'+id).innerText = fN(val_thuc);
-    });
-
-    document.getElementById('tong1Full').innerText = fN(t1_Full);
-    document.getElementById('r_ngaycong').innerText = fN(lcb * tile);
-    document.getElementById('top_tongPC').innerText = fN(t1_PC_ThucTe);
-    
-    const luongTC = lcb + gV('pccv') + gV('pckn') + gV('pctn') + gV('pcsk') + gV('pcno');
-    const gioTC = luongTC / chuan / 8;
-    document.getElementById('top_luongTC').innerText = fN(luongTC);
-
-    const tcs = [{id:'g150',h:1.5,r:'t150'},{id:'g200',h:2,r:'t200'},{id:'g210',h:2.1,r:'t210'},{id:'g200cn',h:2,r:'t200cn'},{id:'g270',h:2.7,r:'t270'},{id:'g300',h:3,r:'t300'},{id:'g390',h:3.9,r:'t390'}];
-    let t3 = 0;
-    tcs.forEach(x => {
-        let money = gV(x.id) * gioTC * x.h;
-        document.getElementById(x.r).innerText = fN(money);
-        t3 += money;
-    });
-
-    document.getElementById('tong3').innerText = fN(t3);
-    let pnu = document.getElementById('chk_pnu').checked ? (gioTC * 2.25) : 0;
-    document.getElementById('res_pnu').innerText = fN(pnu);
-    
-    let t2 = pnu + gV('tk') + gV('trenho') + gV('phepton') + gV('dcluong') + gV('th_da') + gV('th_khac') + gV('pc_an') + gV('pc_hoso');
-    document.getElementById('tong2').innerText = fN(t2);
-
-    const bh = (lcb + gV('pccv') + gV('pckn') + gV('pctn') + gV('pcsk')) * 0.105;
-    document.getElementById('bhxh').innerText = fN(bh);
-    let t4 = bh + 30000 + gV('trukhac');
-    document.getElementById('tong4').innerText = fN(t4);
-
-    let final = t1_ThucTe + t2 + t3 - t4;
-    document.getElementById('final_total_top').innerText = fN(final);
-    document.getElementById('final_total_footer').innerText = fN(final);
-    document.getElementById('footer_month').innerText = document.getElementById('selMonth').value;
-    
-    saveDraft(); // Luôn lưu nháp mỗi khi tính toán
-}
-
-function load(isDateChanged = false) {
-    const nameInput = document.getElementById('userName');
-    const month = document.getElementById('selMonth').value;
-    const year = document.getElementById('selYear').value;
-    const historySelect = document.getElementById('historySelect');
-    const history = JSON.parse(localStorage.getItem(STORAGE_KEY_HISTORY) || '{}');
-    
-    // Lưu lại tên hiện tại và chuyển in hoa
-    let currentName = nameInput.value.toUpperCase();
-    nameInput.value = currentName; 
-    
-    const targetSuffix = `Tháng ${month} - ${year}`;
-    const allKeysInMonth = Object.keys(history).filter(key => key.endsWith(targetSuffix));
-
-    if (allKeysInMonth.length > 0) {
-        // TRƯỜNG HỢP THÁNG CÓ DỮ LIỆU
-        const historyKeyWithCurrentName = `${currentName} - ${targetSuffix}`;
-        
-        // Nếu tên đang trống, tự động nạp người đầu tiên
-        if (!currentName) {
-            const foundKey = allKeysInMonth[0]; 
-            currentName = foundKey.split(" - Tháng")[0].toUpperCase();
-            nameInput.value = currentName;
-            fillData(history[foundKey]);
-            historySelect.value = foundKey;
-        } 
-        // Nếu tên khớp với người trong lịch sử, nạp dữ liệu người đó
-        else if (history[historyKeyWithCurrentName]) {
-            fillData(history[historyKeyWithCurrentName]);
-            historySelect.value = historyKeyWithCurrentName;
-        }
-    } else {
-        // TRƯỜNG HỢP THÁNG TRỐNG (CHƯA AI LƯU)
-        // Chỉ xóa tên khi bạn CHỦ ĐỘNG ĐỔI THÁNG/NĂM
-        if (isDateChanged === true) {
-            nameInput.value = ""; 
-            resetNumbersOnly();
-            historySelect.value = 'current';
-        }
-    }
-
-    updateCongChuan();
-    calculateAll();
-    if(typeof calculateYearTotal === 'function') calculateYearTotal();
-}
-
 function fillData(data) {
-    for (let id in data) {
-        let e = document.getElementById(id);
-        if (e && id !== 'selMonth' && id !== 'selYear') { 
-            if (e.type === 'checkbox') e.checked = data[id]; 
-            else e.value = data[id]; 
-        }
-    }
-}
-
-function resetNumbersOnly() {
+    if (!data) return;
     document.querySelectorAll('.save').forEach(e => {
-        if (e.id !== 'selMonth' && e.id !== 'selYear' && e.id !== 'userName') {
-            if (e.type === 'checkbox') e.checked = (e.id === 'chk_pnu');
-            else e.value = "";
+        if (data[e.id] !== undefined) {
+            if (e.type === 'checkbox') e.checked = data[e.id];
+            else e.value = data[e.id];
         }
     });
 }
 
 function saveMonthlyData() {
     const name = document.getElementById('userName').value.trim();
-    if (!name) { alert("⚠️ VUI LÒNG NHẬP HỌ TÊN!"); return; }
-    
-    const month = document.getElementById('selMonth').value;
-    const year = document.getElementById('selYear').value;
-    const key = `${name} - Tháng ${month} - ${year}`;
+    if (!name) { alert("⚠️ NHẬP TÊN TRƯỚC!"); return; }
+    const key = `${name.toUpperCase()} - Tháng ${document.getElementById('selMonth').value} - ${document.getElementById('selYear').value}`;
     let history = JSON.parse(localStorage.getItem(STORAGE_KEY_HISTORY) || '{}');
-    
-    if (history[key] && !confirm(`Ghi đè phiếu của [${name}]?`)) return;
-    
     let d = {};
-    document.querySelectorAll('.save').forEach(e => { 
-        d[e.id] = (e.type === 'checkbox' ? e.checked : e.value); 
-    });
-    
+    document.querySelectorAll('.save').forEach(e => { d[e.id] = (e.type === 'checkbox' ? e.checked : e.value); });
     history[key] = d;
     localStorage.setItem(STORAGE_KEY_HISTORY, JSON.stringify(history));
-    alert(`✅ Đã lưu: ${name}`);
+    alert("✅ ĐÃ LƯU VÀO LỊCH SỬ!");
     updateHistoryList();
-    document.getElementById('historySelect').value = key;
-    if(typeof calculateYearTotal === 'function') calculateYearTotal();
+    if(document.getElementById('show_year_total').checked) calculateYearTotal();
+}
+
+function deleteMonthlyData() {
+    const select = document.getElementById('historySelect');
+    if (select.value === 'current') { alert("⚠️ Hãy chọn một phiếu trong Lịch sử để xoá!"); return; }
+    if (confirm(`❗ Xoá vĩnh viễn dữ liệu: ${select.value}?`)) {
+        let history = JSON.parse(localStorage.getItem(STORAGE_KEY_HISTORY) || '{}');
+        delete history[select.value];
+        localStorage.setItem(STORAGE_KEY_HISTORY, JSON.stringify(history));
+        updateHistoryList();
+        location.reload();
+    }
 }
 
 function updateHistoryList() {
-    const select = document.getElementById('historySelect');
-    const history = JSON.parse(localStorage.getItem(STORAGE_KEY_HISTORY) || '{}');
-    select.innerHTML = '<option value="current">-- Đang nhập --</option>';
-    Object.keys(history).sort().forEach(key => {
-        let opt = document.createElement('option');
-        opt.value = key; opt.innerText = key;
-        select.appendChild(opt);
+    const s = document.getElementById('historySelect');
+    const h = JSON.parse(localStorage.getItem(STORAGE_KEY_HISTORY) || '{}');
+    s.innerHTML = '<option value="current">-- Đang nhập --</option>';
+    Object.keys(h).sort().forEach(k => {
+        let o = document.createElement('option'); o.value = k; o.innerText = k; s.appendChild(o);
     });
 }
 
 function loadMonthlyData() {
     const select = document.getElementById('historySelect');
-    if (select.value === 'current') {
-        document.getElementById('userName').value = "";
-        resetNumbersOnly();
-        calculateAll();
-        return; 
-    }
+    if (select.value === 'current') return;
     const history = JSON.parse(localStorage.getItem(STORAGE_KEY_HISTORY) || '{}');
     fillData(history[select.value]);
-    document.getElementById('userName').value = select.value.split(" - Tháng")[0];
     calculateAll();
 }
 
+function updateCongChuan() {
+    const m = parseInt(document.getElementById('selMonth').value);
+    const y = parseInt(document.getElementById('selYear').value);
+    let days = new Date(y, m, 0).getDate();
+    let workDays = 0;
+    for (let d = 1; d <= days; d++) { if (new Date(y, m - 1, d).getDay() !== 0) workDays++; }
+    document.getElementById('soCongChuan').value = workDays > 26 ? 26 : workDays;
+}
+
+function load(isDateChanged = false) {
+    if (isDateChanged) {
+        updateCongChuan();
+        calculateAll();
+    }
+}
+
+window.onload = () => {
+    updateVisitCount();
+    const draft = JSON.parse(localStorage.getItem(DRAFT_KEY) || '{}');
+    if (draft.selMonth) fillData(draft);
+    updateHistoryList();
+    updateCongChuan();
+    calculateAll();
+};
+
 document.addEventListener('input', (e) => {
+    if(e.target.id === 'userName') e.target.value = e.target.value.toUpperCase();
     if(e.target.classList.contains('only-num')) e.target.value = e.target.value.replace(/[^0-9]/g, '');
     if(e.target.classList.contains('only-num-dot')) {
         let v = e.target.value.replace(/[^0-9.]/g, '');
@@ -448,62 +464,6 @@ document.addEventListener('input', (e) => {
     }
     calculateAll();
 });
-
-function toggleYearTotal() {
-    const isChecked = document.getElementById('show_year_total').checked;
-    document.getElementById('year_total_content').style.display = isChecked ? 'flex' : 'none';
-    document.getElementById('year_total_placeholder').style.display = isChecked ? 'none' : 'inline';
-    if (isChecked) calculateYearTotal();
-}
-
-function calculateYearTotal() {
-    if (!document.getElementById('show_year_total').checked) return;
-    const history = JSON.parse(localStorage.getItem(STORAGE_KEY_HISTORY) || '{}');
-    const selectedYear = document.getElementById('selYear').value;
-    const currentName = document.getElementById('userName').value.trim();
-    let totalYear = 0;
-    if (!currentName) { document.getElementById('year_total').innerText = "0"; return; }
-
-    for (let key in history) {
-        if (key.startsWith(currentName + " -") && key.includes(" - " + selectedYear)) {
-            const d = history[key];
-            const n = (id) => parseFloat(String(d[id] || '0').replace(/,/g, '')) || 0;
-            if (n('luongCB') <= 0) continue;
-            const chuan = n('soCongChuan') || 26;
-            const thuc = n('soNgayGio') || 0;
-            const tile = thuc / chuan;
-            let t1_thuc = 0;
-            ['luongCB','pccv','pckn','pcat','pcpccc','pcsk','pctn','pcdt','pcno','pcdl','pccc'].forEach(id => { t1_thuc += n(id) * tile; });
-            const luongTC = n('luongCB') + n('pccv') + n('pckn') + n('pctn') + n('pcsk') + n('pcno');
-            const gioTC = luongTC / chuan / 8;
-            let t3 = (n('g150')*1.5 + n('g200')*2 + n('g210')*2.1 + n('g200cn')*2 + n('g270')*2.7 + n('g300')*3 + n('g390')*3.9) * gioTC;
-            let pnu = d.chk_pnu ? (gioTC * 2.25) : 0;
-            let t2 = pnu + n('tk') + n('trenho') + n('phepton') + n('dcluong') + n('th_da') + n('th_khac') + n('pc_an') + n('pc_hoso');
-            const bh = (n('luongCB') + n('pccv') + n('pckn') + n('pctn') + n('pcsk')) * 0.105;
-            let t4 = bh + 30000 + n('trukhac');
-            totalYear += (t1_thuc + t2 + t3 - t4);
-        }
-    }
-    document.getElementById('year_total').innerText = fN(totalYear);
-}
-
-window.onload = () => {
-    // Ưu tiên nạp dữ liệu từ nháp trước để giữ trạng thái Tháng/Năm cũ
-    const draft = JSON.parse(localStorage.getItem(DRAFT_KEY) || '{}');
-    if (draft.selMonth) document.getElementById('selMonth').value = draft.selMonth;
-    else document.getElementById('selMonth').value = new Date().getMonth() + 1;
-    
-    if (draft.selYear) document.getElementById('selYear').value = draft.selYear;
-    else document.getElementById('selYear').value = new Date().getFullYear();
-
-    updateHistoryList(); 
-    updateCongChuan();
-    load(false); 
-
-    let visits = localStorage.getItem('personal_visits') || 0;
-    localStorage.setItem('personal_visits', ++visits);
-    document.getElementById('visit_count').innerText = visits;
-};
 </script>
 </body>
 </html>
