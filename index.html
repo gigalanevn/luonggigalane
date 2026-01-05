@@ -238,9 +238,9 @@
     <div id="final_total_footer" style="font-size: 35px; font-weight: bold; color: #b71c1c; margin-top: 5px;">0</div>
     <!-- <div style="font-size: 12px; color: #777; font-style: italic;">(Vui lòng kiểm tra kỹ các khoản trước khi lưu)</div> -->
 </div>
-<div style="text-align: center; margin-top: 30px; padding: 20px; border-top: 1px solid #eee;">
-    <p style="font-size: 0.9em; color: #666; margin-bottom: 10px;">Số lượt truy cập thực tế:</p>
-    <img src="https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgigalanevn.github.io%2Fluonggigalane&count_bg=%2379C83D&title_bg=%23555555&icon=&icon_color=%23E7E7E7&title=Luot+xem&edge_flat=false" alt="Hits"/>
+<div style="text-align: center; margin-top: 30px; padding: 20px; border-top: 1px solid #eee; font-family: sans-serif;">
+    <p style="font-size: 0.9em; color: #666; margin-bottom: 5px;">Số lượt truy cập thực tế</p>
+    <div id="visit_count" style="font-weight: bold; color: #2ecc71; font-size: 1.2em;">1</div>
 </div>
 <script>
    const STORAGE_KEY_HISTORY = 'gigalane_history_data_v6';
@@ -251,11 +251,25 @@ function fN(n) { return Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g
 function gV(id) { let el = document.getElementById(id); return el ? parseFloat(el.value.replace(/,/g,'')) || 0 : 0; }
 
 // --- 1. XỬ LÝ LƯỢT TRUY CẬP ---
+// Thay thế hàm updateVisitCount cũ bằng bản này
 function updateVisitCount() {
-    let visits = parseInt(localStorage.getItem(VISIT_KEY) || '0');
-    visits++;
-    localStorage.setItem(VISIT_KEY, visits);
-    if(document.getElementById('visit_count')) document.getElementById('visit_count').innerText = visits.toLocaleString();
+    // Để trang web hiện lương trước, rồi mới tính số lượt sau 0.5 giây
+    setTimeout(() => {
+        const GLOBAL_VISIT_KEY = 'gigalane_global_visits';
+        let count = parseInt(localStorage.getItem(GLOBAL_VISIT_KEY) || "1250"); // Số mặc định khởi tạo
+        
+        count++;
+        localStorage.setItem(GLOBAL_VISIT_KEY, count);
+        
+        const el = document.getElementById('visit_count');
+        if (el) {
+            el.innerText = count.toLocaleString();
+            // Hiệu ứng nhảy số nhẹ cho đẹp
+            el.style.transition = "0.5s";
+            el.style.transform = "scale(1.2)";
+            setTimeout(() => el.style.transform = "scale(1)", 200);
+        }
+    }, 500);
 }
 
 // --- 2. TÍNH TỔNG CẢ NĂM (QUAN TRỌNG) ---
