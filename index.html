@@ -277,32 +277,38 @@ function calculateYearTotal() {
         return;
     }
 
-    for (let key in history) {
-        // Chỉ cộng dồn nếu Tên khớp và Năm khớp trong Lịch sử
+    Object.keys(history).forEach(key => {
+        // Kiểm tra đúng định dạng: "TÊN - Tháng X - Năm"
         if (key.startsWith(currentName + " -") && key.endsWith(" - " + selectedYear)) {
-            const d = history[key];
-            const getV = (id) => parseFloat(String(d[id] || '0').replace(/,/g, '')) || 0;
+            const data = history[key];
+            const getNum = (id) => parseFloat(String(data[id] || '0').replace(/,/g, '')) || 0;
             
-            const chuan = getV('soCongChuan') || 26;
-            const thuc = getV('soNgayGio') || 0;
-            const tile = thuc / chuan;
+            const cc = getNum('soCongChuan') || 26;
+            const ct = getNum('soNgayGio') || 0;
+            const tl = ct / cc;
 
-            // Tính toán thực lĩnh của tháng đó trong lịch sử
-            let t1_thuc = 0;
+            // Tính thực nhận Mục 1
+            let m1 = 0;
             ['luongCB','pccv','pckn','pcat','pcpccc','pcsk','pctn','pcdt','pcno','pcdl','pccc'].forEach(id => {
-                t1_thuc += getV(id) * tile;
+                m1 += getNum(id) * tl;
             });
 
-            const luongTC = getV('luongCB') + getV('pccv') + getV('pckn') + getV('pctn') + getV('pcsk') + getV('pcno');
-            const gia1Gio = luongTC / chuan / 8;
-            let t3 = (getV('g150')*1.5 + getV('g200')*2 + getV('g210')*2.1 + getV('g200cn')*2 + getV('g270')*2.7 + getV('g300')*3 + getV('g390')*3.9) * gia1Gio;
-            let pnu = d.chk_pnu ? (gia1Gio * 2.25) : 0;
-            let t2 = pnu + getV('tk') + getV('trenho') + getV('phepton') + getV('dcluong') + getV('th_da') + getV('th_khac') + getV('pc_an') + getV('pc_hoso');
-            const bh = (getV('luongCB') + getV('pccv') + getV('pckn') + getV('pctn') + getV('pcsk')) * 0.105;
-            
-            totalYear += (t1_thuc + t2 + t3 - (bh + 30000 + getV('trukhac')));
+            // Tính thực nhận Mục 3 (Tăng ca)
+            const ltc = getNum('luongCB') + getNum('pccv') + getNum('pckn') + getNum('pctn') + getNum('pcsk') + getNum('pcno');
+            const g1 = ltc / cc / 8;
+            let m3 = (getNum('g150')*1.5 + getNum('g200')*2 + getNum('g210')*2.1 + getNum('g200cn')*2 + getNum('g270')*2.7 + getNum('g300')*3 + getNum('g390')*3.9) * g1;
+
+            // Tính thực nhận Mục 2
+            let pnu = data.chk_pnu ? (g1 * 2.25) : 0;
+            let m2 = pnu + getNum('tk') + getNum('trenho') + getNum('phepton') + getNum('dcluong') + getNum('th_da') + getNum('th_khac') + getNum('pc_an') + getNum('pc_hoso');
+
+            // Tính Giảm trừ Mục 4
+            const bh = (getNum('luongCB') + getNum('pccv') + getNum('pckn') + getNum('pctn') + getNum('pcsk')) * 0.105;
+            const m4 = bh + 30000 + getNum('trukhac');
+
+            totalYear += (m1 + m2 + m3 - m4);
         }
-    }
+    });
     document.getElementById('year_total').innerText = fN(totalYear);
 }
 
