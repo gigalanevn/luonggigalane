@@ -93,16 +93,21 @@
 
     <div class="header-top">
         <div class="header-left">
-            <div><label>HỌ TÊN:</label> <input type="text" id="userName" placeholder="NHẬP TÊN..." class="input-name save" oninput="load()"></div>
+            <div><label>HỌ TÊN:</label> <style>
+    #userName { text-transform: uppercase; }
+</style>
+
+<input type="text" id="userName" placeholder="NHẬP TÊN..." class="input-name save" oninput="load(false)">
+</div>
             <div>
                 <!-- <select id="selMonth" class="select-date save" onchange="updateCongChuan(); load();"> -->
-                    <select id="selMonth" class="select-date save" onchange="load()">
+                  <select id="selMonth" class="select-date save" onchange="load(true)">
                     <script>for(let i=1; i<=12; i++) document.write(`<option value="${i}">Tháng ${i}</option>`)</script>
                 </select>
                     <!-- <select id="selYear" class="select-date save" onchange="document.getElementById('show_year_total').checked = false; toggleYearTotal(); updateCongChuan(); load();"> -->
                         <!-- <select id="selYear" class="select-date save" onchange="document.getElementById('show_year_total').checked = false; updateCongChuan(); load(); calculateYearTotal();"> -->
             <!-- <select id="selYear" class="select-date save" onchange="document.getElementById('show_year_total').checked = false; toggleYearTotal(); updateCongChuan(); document.getElementById('historySelect').value='current'; load();"> -->
-                <select id="selYear" class="select-date save" onchange="load()">
+               <select id="selYear" class="select-date save" onchange="load(true)">
                     <script>for(let i=2025; i<=2035; i++) document.write(`<option value="${i}">Năm ${i}</option>`)</script>
                 </select>
             </div>
@@ -130,8 +135,8 @@
         <select id="historySelect" onchange="loadMonthlyData()">
             <option value="current">-- Đang nhập --</option>
         </select>
-        <button class="btn-save" onclick="saveMonthlyData()">Lưu Phiếu Tháng Này</button>
-        <button onclick="deleteMonthlyData()" style="background: #dc3545; color: white; border: none; padding: 6px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-left: 5px;">Xoá Phiếu Tháng Này</button>
+        <button class="btn-save" onclick="saveMonthlyData()">Lưu Phiếu Lương Tháng Này</button>
+        <button onclick="deleteMonthlyData()" style="background: #dc3545; color: white; border: none; padding: 6px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-left: 5px;">Xoá Phiếu Lương Tháng Này</button>
     </div>
     
     <div class="info-bar">
@@ -237,105 +242,160 @@
     👁️ Visit: <span id="visit_count">...</span>
 </div>
 <script>
-    document.getElementById('userName').addEventListener('input', function() {
-    this.style.borderBottom = "2.5px solid var(--blue-focus)";
-});
+const STORAGE_KEY_HISTORY = 'gigalane_history_data_v6';
+const DRAFT_KEY = 'gigalane_draft_data';
 
-    const STORAGE_KEY_HISTORY = 'gigalane_history_data_v6';
-    function fN(n) { return Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","); }
-    function gV(id) { let el = document.getElementById(id); return el ? parseFloat(el.value.replace(/,/g,'')) || 0 : 0; }
+function fN(n) { return Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","); }
+function gV(id) { let el = document.getElementById(id); return el ? parseFloat(el.value.replace(/,/g,'')) || 0 : 0; }
+
+// --- HÀM LƯU NHÁP TỰ ĐỘNG ---
+function saveDraft() {
+    const d = {};
+    document.querySelectorAll('.save').forEach(e => {
+        d[e.id] = (e.type === 'checkbox' ? e.checked : e.value);
+    });
+    localStorage.setItem(DRAFT_KEY, JSON.stringify(d));
+}
 
 function updateCongChuan() {
     const month = parseInt(document.getElementById('selMonth').value);
     const year = parseInt(document.getElementById('selYear').value);
-    
-    // Tính tổng số ngày trong tháng
     let totalDays = new Date(year, month, 0).getDate();
     let countWorkDays = 0;
-
-    // Đếm các ngày không phải Chủ Nhật
     for (let d = 1; d <= totalDays; d++) {
         let dayOfWeek = new Date(year, month - 1, d).getDay();
-        if (dayOfWeek !== 0) { // 0 là Chủ Nhật
-            countWorkDays++;
-        }
+        if (dayOfWeek !== 0) countWorkDays++;
     }
-
-    // Quy tắc: Nếu > 26 thì lấy 26, nếu nhỏ hơn thì lấy thực tế
     let finalCongChuan = countWorkDays > 26 ? 26 : countWorkDays;
-    
-    // Cập nhật vào ô input
     document.getElementById('soCongChuan').value = finalCongChuan;
 }
 
-    function calculateAll() {
-        const chuan = gV('soCongChuan') || 26;
-        const thuc = gV('soNgayGio');
-        const tile = thuc / chuan;
-        let lcb = gV('luongCB');
-        let t1_Full = 0, t1_ThucTe = 0, t1_PC_ThucTe = 0;
-        const list1 = ['luongCB','pccv','pckn','pcat','pcpccc','pcsk','pctn','pcdt','pcno','pcdl','pccc'];
-        list1.forEach(id => {
-            let val = gV(id); t1_Full += val;
-            let val_thuc = val * tile; t1_ThucTe += val_thuc;
-            if(id !== 'luongCB') t1_PC_ThucTe += val_thuc;
-            if(document.getElementById('r_'+id)) document.getElementById('r_'+id).innerText = fN(val_thuc);
-        });
-        document.getElementById('tong1Full').innerText = fN(t1_Full);
-        document.getElementById('r_ngaycong').innerText = fN(lcb * tile);
-        document.getElementById('top_tongPC').innerText = fN(t1_PC_ThucTe);
-        const luongTC = lcb + gV('pccv') + gV('pckn') + gV('pctn') + gV('pcsk') + gV('pcno');
-        const gioTC = luongTC / chuan / 8;
-        document.getElementById('top_luongTC').innerText = fN(luongTC);
-        const tcs = [{id:'g150',h:1.5,r:'t150'},{id:'g200',h:2,r:'t200'},{id:'g210',h:2.1,r:'t210'},{id:'g200cn',h:2,r:'t200cn'},{id:'g270',h:2.7,r:'t270'},{id:'g300',h:3,r:'t300'},{id:'g390',h:3.9,r:'t390'}];
-        let t3 = 0;
-        tcs.forEach(x => {
-            let money = gV(x.id) * gioTC * x.h;
-            document.getElementById(x.r).innerText = fN(money);
-            t3 += money;
-        });
-        document.getElementById('tong3').innerText = fN(t3);
-        let pnu = document.getElementById('chk_pnu').checked ? (gioTC * 2.25) : 0;
-        document.getElementById('res_pnu').innerText = fN(pnu);
-        let t2 = pnu + gV('tk') + gV('trenho') + gV('phepton') + gV('dcluong') + gV('th_da') + gV('th_khac') + gV('pc_an') + gV('pc_hoso');
-        document.getElementById('tong2').innerText = fN(t2);
-        const bh = (lcb + gV('pccv') + gV('pckn') + gV('pctn') + gV('pcsk')) * 0.105;
-        document.getElementById('bhxh').innerText = fN(bh);
-        let t4 = bh + 30000 + gV('trukhac');
-        document.getElementById('tong4').innerText = fN(t4);
-        document.getElementById('final_total_top').innerText = fN(t1_ThucTe + t2 + t3 - t4);
-        // Cập nhật số tiền xuống dưới chân trang
-document.getElementById('final_total_footer').innerText = fN(t1_ThucTe + t2 + t3 - t4);
+function calculateAll() {
+    const chuan = gV('soCongChuan') || 26;
+    const thuc = gV('soNgayGio');
+    const tile = thuc / chuan;
+    let lcb = gV('luongCB');
+    let t1_Full = 0, t1_ThucTe = 0, t1_PC_ThucTe = 0;
+    const list1 = ['luongCB','pccv','pckn','pcat','pcpccc','pcsk','pctn','pcdt','pcno','pcdl','pccc'];
+    
+    list1.forEach(id => {
+        let val = gV(id); t1_Full += val;
+        let val_thuc = val * tile; t1_ThucTe += val_thuc;
+        if(id !== 'luongCB') t1_PC_ThucTe += val_thuc;
+        if(document.getElementById('r_'+id)) document.getElementById('r_'+id).innerText = fN(val_thuc);
+    });
 
-// Cập nhật số tháng hiển thị dưới chân trang
-document.getElementById('footer_month').innerText = document.getElementById('selMonth').value;
-        save();
+    document.getElementById('tong1Full').innerText = fN(t1_Full);
+    document.getElementById('r_ngaycong').innerText = fN(lcb * tile);
+    document.getElementById('top_tongPC').innerText = fN(t1_PC_ThucTe);
+    
+    const luongTC = lcb + gV('pccv') + gV('pckn') + gV('pctn') + gV('pcsk') + gV('pcno');
+    const gioTC = luongTC / chuan / 8;
+    document.getElementById('top_luongTC').innerText = fN(luongTC);
+
+    const tcs = [{id:'g150',h:1.5,r:'t150'},{id:'g200',h:2,r:'t200'},{id:'g210',h:2.1,r:'t210'},{id:'g200cn',h:2,r:'t200cn'},{id:'g270',h:2.7,r:'t270'},{id:'g300',h:3,r:'t300'},{id:'g390',h:3.9,r:'t390'}];
+    let t3 = 0;
+    tcs.forEach(x => {
+        let money = gV(x.id) * gioTC * x.h;
+        document.getElementById(x.r).innerText = fN(money);
+        t3 += money;
+    });
+
+    document.getElementById('tong3').innerText = fN(t3);
+    let pnu = document.getElementById('chk_pnu').checked ? (gioTC * 2.25) : 0;
+    document.getElementById('res_pnu').innerText = fN(pnu);
+    
+    let t2 = pnu + gV('tk') + gV('trenho') + gV('phepton') + gV('dcluong') + gV('th_da') + gV('th_khac') + gV('pc_an') + gV('pc_hoso');
+    document.getElementById('tong2').innerText = fN(t2);
+
+    const bh = (lcb + gV('pccv') + gV('pckn') + gV('pctn') + gV('pcsk')) * 0.105;
+    document.getElementById('bhxh').innerText = fN(bh);
+    let t4 = bh + 30000 + gV('trukhac');
+    document.getElementById('tong4').innerText = fN(t4);
+
+    let final = t1_ThucTe + t2 + t3 - t4;
+    document.getElementById('final_total_top').innerText = fN(final);
+    document.getElementById('final_total_footer').innerText = fN(final);
+    document.getElementById('footer_month').innerText = document.getElementById('selMonth').value;
+    
+    saveDraft(); // Luôn lưu nháp mỗi khi tính toán
+}
+
+function load(isDateChanged = false) {
+    const nameInput = document.getElementById('userName');
+    const month = document.getElementById('selMonth').value;
+    const year = document.getElementById('selYear').value;
+    const historySelect = document.getElementById('historySelect');
+    const history = JSON.parse(localStorage.getItem(STORAGE_KEY_HISTORY) || '{}');
+    
+    // Lưu lại tên hiện tại và chuyển in hoa
+    let currentName = nameInput.value.toUpperCase();
+    nameInput.value = currentName; 
+    
+    const targetSuffix = `Tháng ${month} - ${year}`;
+    const allKeysInMonth = Object.keys(history).filter(key => key.endsWith(targetSuffix));
+
+    if (allKeysInMonth.length > 0) {
+        // TRƯỜNG HỢP THÁNG CÓ DỮ LIỆU
+        const historyKeyWithCurrentName = `${currentName} - ${targetSuffix}`;
+        
+        // Nếu tên đang trống, tự động nạp người đầu tiên
+        if (!currentName) {
+            const foundKey = allKeysInMonth[0]; 
+            currentName = foundKey.split(" - Tháng")[0].toUpperCase();
+            nameInput.value = currentName;
+            fillData(history[foundKey]);
+            historySelect.value = foundKey;
+        } 
+        // Nếu tên khớp với người trong lịch sử, nạp dữ liệu người đó
+        else if (history[historyKeyWithCurrentName]) {
+            fillData(history[historyKeyWithCurrentName]);
+            historySelect.value = historyKeyWithCurrentName;
+        }
+    } else {
+        // TRƯỜNG HỢP THÁNG TRỐNG (CHƯA AI LƯU)
+        // Chỉ xóa tên khi bạn CHỦ ĐỘNG ĐỔI THÁNG/NĂM
+        if (isDateChanged === true) {
+            nameInput.value = ""; 
+            resetNumbersOnly();
+            historySelect.value = 'current';
+        }
     }
+
+    updateCongChuan();
+    calculateAll();
+    if(typeof calculateYearTotal === 'function') calculateYearTotal();
+}
+
+function fillData(data) {
+    for (let id in data) {
+        let e = document.getElementById(id);
+        if (e && id !== 'selMonth' && id !== 'selYear') { 
+            if (e.type === 'checkbox') e.checked = data[id]; 
+            else e.value = data[id]; 
+        }
+    }
+}
+
+function resetNumbersOnly() {
+    document.querySelectorAll('.save').forEach(e => {
+        if (e.id !== 'selMonth' && e.id !== 'selYear' && e.id !== 'userName') {
+            if (e.type === 'checkbox') e.checked = (e.id === 'chk_pnu');
+            else e.value = "";
+        }
+    });
+}
 
 function saveMonthlyData() {
-    // 1. Lấy tên và kiểm tra
-    const userNameInput = document.getElementById('userName');
-    const name = userNameInput.value.trim();
-
-    if (!name) {
-        alert("⚠️ VUI LÒNG NHẬP HỌ TÊN TRƯỚC KHI LƯU!");
-        userNameInput.focus(); // Tự động đưa con trỏ chuột vào ô tên
-        userNameInput.style.border = "2px solid red"; // Bôi đỏ ô tên để nhắc nhở
-        return; // Dừng hàm, không chạy các lệnh lưu phía dưới
-    }
-
-    // Nếu có tên, trả lại màu viền bình thường (màu cam cũ của bạn)
-    userNameInput.style.border = "none";
-    userNameInput.style.borderBottom = "2px solid var(--border-black)";
-
-    // 2. Tiếp tục logic lưu như cũ
+    const name = document.getElementById('userName').value.trim();
+    if (!name) { alert("⚠️ VUI LÒNG NHẬP HỌ TÊN!"); return; }
+    
     const month = document.getElementById('selMonth').value;
     const year = document.getElementById('selYear').value;
     const key = `${name} - Tháng ${month} - ${year}`;
-    
     let history = JSON.parse(localStorage.getItem(STORAGE_KEY_HISTORY) || '{}');
     
-    if (history[key] && !confirm(`Bạn đã lưu phiếu cho [${name}] trong tháng này rồi. Có muốn ghi đè không?`)) return;
+    if (history[key] && !confirm(`Ghi đè phiếu của [${name}]?`)) return;
     
     let d = {};
     document.querySelectorAll('.save').forEach(e => { 
@@ -344,307 +404,106 @@ function saveMonthlyData() {
     
     history[key] = d;
     localStorage.setItem(STORAGE_KEY_HISTORY, JSON.stringify(history));
-    
-    alert(`✅ Đã lưu thành công phiếu lương của: ${name}`);
-    updateHistoryList(); 
-    document.getElementById('historySelect').value = key; 
-    if(typeof calculateYearTotal === 'function') calculateYearTotal(); 
+    alert(`✅ Đã lưu: ${name}`);
+    updateHistoryList();
+    document.getElementById('historySelect').value = key;
+    if(typeof calculateYearTotal === 'function') calculateYearTotal();
 }
 
 function updateHistoryList() {
     const select = document.getElementById('historySelect');
     const history = JSON.parse(localStorage.getItem(STORAGE_KEY_HISTORY) || '{}');
-    
-    // Reset danh sách
     select.innerHTML = '<option value="current">-- Đang nhập --</option>';
-    
-    // Lấy danh sách tháng đã lưu, sắp xếp và đưa vào menu
     Object.keys(history).sort().forEach(key => {
-        let opt = document.createElement('option'); 
-        opt.value = key; 
-        opt.innerText = key;
+        let opt = document.createElement('option');
+        opt.value = key; opt.innerText = key;
         select.appendChild(opt);
     });
 }
 
 function loadMonthlyData() {
     const select = document.getElementById('historySelect');
-    const nameInput = document.getElementById('userName');
-
     if (select.value === 'current') {
-        // Chỉ xóa khi chủ động chọn dòng "-- Đang nhập --"
-        nameInput.value = "";
-        
-        // Xóa trắng các ô nhập liệu số khác
-        document.querySelectorAll('.save').forEach(e => {
-            if (e.id !== 'selMonth' && e.id !== 'selYear' && e.id !== 'userName') {
-                if (e.type === 'checkbox') e.checked = (e.id === 'chk_pnu');
-                else e.value = "";
-            }
-        });
+        document.getElementById('userName').value = "";
+        resetNumbersOnly();
         calculateAll();
-        // Reset tổng năm về 0 vì tên đã trống
-        if (typeof calculateYearTotal === 'function') calculateYearTotal();
         return; 
     }
-    
     const history = JSON.parse(localStorage.getItem(STORAGE_KEY_HISTORY) || '{}');
-    const data = history[select.value];
-    
-    if (data) {
-        for (let id in data) {
-            let e = document.getElementById(id);
-            if (e) { 
-                if (e.type === 'checkbox') e.checked = data[id]; 
-                else e.value = data[id]; 
-            }
-        }
-        calculateAll();
-        if (typeof calculateYearTotal === 'function') calculateYearTotal();
-    }
-}
-    function save() {
-        const d = {};
-        document.querySelectorAll('.save').forEach(e => { d[e.id] = (e.type === 'checkbox' ? e.checked : e.value); });
-        localStorage.setItem('salary_gigalane_2025_v6', JSON.stringify(d));
-    }
-
-function load() {
-    const nameInput = document.getElementById('userName');
-    const month = document.getElementById('selMonth').value;
-    const year = document.getElementById('selYear').value;
-    const historySelect = document.getElementById('historySelect');
-    const history = JSON.parse(localStorage.getItem(STORAGE_KEY_HISTORY) || '{}');
-    
-    // Tự động chuyển tên đang nhập thành CHỮ HOA
-    nameInput.value = nameInput.value.toUpperCase();
-    let currentName = nameInput.value.trim();
-    
-    const targetSuffix = `Tháng ${month} - ${year}`;
-
-    // 1. Kiểm tra xem tháng/năm này đã có bất kỳ dữ liệu của ai chưa
-    const allKeysInMonth = Object.keys(history).filter(key => key.endsWith(targetSuffix));
-
-    if (allKeysInMonth.length > 0) {
-        // TH1: CÓ DỮ LIỆU TRONG THÁNG NÀY (Load dữ liệu cũ)
-        
-        const historyKeyWithCurrentName = `${currentName} - ${targetSuffix}`;
-        
-        // Nếu tên trống hoặc người này chưa có dữ liệu tháng này -> Lấy người đầu danh sách
-        if (!currentName || !history[historyKeyWithCurrentName]) {
-            const foundKey = allKeysInMonth[0]; 
-            currentName = foundKey.split(" - Tháng")[0].toUpperCase();
-            nameInput.value = currentName;
-        }
-
-        const finalKey = `${currentName} - ${targetSuffix}`;
-        if (history[finalKey]) {
-            historySelect.value = finalKey;
-            const data = history[finalKey];
-            for (let id in data) {
-                let e = document.getElementById(id);
-                if (e) { 
-                    if (e.type === 'checkbox') e.checked = data[id]; 
-                    else e.value = data[id]; 
-                }
-            }
-        }
-    } else {
-        // TH2: THÁNG NÀY CHƯA CÓ DỮ LIỆU (Xóa sạch để nhập mới)
-        nameInput.value = ""; // Xóa sạch tên
-        historySelect.value = 'current';
-        
-        document.querySelectorAll('.save').forEach(e => {
-            if (e.id !== 'selMonth' && e.id !== 'selYear' && e.id !== 'userName') {
-                if (e.type === 'checkbox') {
-                    e.checked = (e.id === 'chk_pnu'); 
-                } else {
-                    e.value = ""; 
-                }
-            }
-        });
-    }
-
-    updateCongChuan();
+    fillData(history[select.value]);
+    document.getElementById('userName').value = select.value.split(" - Tháng")[0];
     calculateAll();
-    if(typeof calculateYearTotal === 'function') calculateYearTotal();
 }
 
-    document.addEventListener('input', (e) => {
-        if(e.target.classList.contains('only-num')) e.target.value = e.target.value.replace(/[^0-9]/g, '');
-        if(e.target.classList.contains('only-num-dot')) {
-            let v = e.target.value.replace(/[^0-9.]/g, '');
-            if ((v.match(/\./g) || []).length > 1) v = v.substring(0, v.lastIndexOf("."));
-            e.target.value = v;
-        }
-        if(e.target.classList.contains('money')) {
-            let v = e.target.value.replace(/,/g, '');
-            if(v) e.target.value = v.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-        }
-        calculateAll();
-    });
+document.addEventListener('input', (e) => {
+    if(e.target.classList.contains('only-num')) e.target.value = e.target.value.replace(/[^0-9]/g, '');
+    if(e.target.classList.contains('only-num-dot')) {
+        let v = e.target.value.replace(/[^0-9.]/g, '');
+        if ((v.match(/\./g) || []).length > 1) v = v.substring(0, v.lastIndexOf("."));
+        e.target.value = v;
+    }
+    if(e.target.classList.contains('money')) {
+        let v = e.target.value.replace(/,/g, '');
+        if(v) e.target.value = v.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
+    calculateAll();
+});
 
-window.onload = () => {
-    // 1. Thiết lập ngày tháng hiện tại
-    const now = new Date();
-    document.getElementById('selMonth').value = now.getMonth() + 1;
-    document.getElementById('selYear').value = now.getFullYear();
+function toggleYearTotal() {
+    const isChecked = document.getElementById('show_year_total').checked;
+    document.getElementById('year_total_content').style.display = isChecked ? 'flex' : 'none';
+    document.getElementById('year_total_placeholder').style.display = isChecked ? 'none' : 'inline';
+    if (isChecked) calculateYearTotal();
+}
 
-    // 2. Cập nhật danh sách "thực đơn" lịch sử
-    updateHistoryList(); 
-
-    // 3. Tính công chuẩn cho tháng này
-    updateCongChuan();
-
-    // 4. Tìm và load dữ liệu nếu tháng này đã từng lưu
-    load(); 
-
-    // 5. Cập nhật lượt truy cập (Sử dụng bộ đếm cá nhân thay cho API lỗi)
-    let visits = localStorage.getItem('personal_visits') || 0;
-    visits++;
-    localStorage.setItem('personal_visits', visits);
-    document.getElementById('visit_count').innerText = visits;
-    cleanOldHistory(); // xoá các tháng không có tên
-};
 function calculateYearTotal() {
-    // Nếu chưa tick vào ô hiện tổng năm thì không tính
     if (!document.getElementById('show_year_total').checked) return;
-
     const history = JSON.parse(localStorage.getItem(STORAGE_KEY_HISTORY) || '{}');
     const selectedYear = document.getElementById('selYear').value;
     const currentName = document.getElementById('userName').value.trim();
-    
     let totalYear = 0;
-
-    // Nếu chưa nhập tên thì hiển thị 0 và dừng
-    if (!currentName) {
-        document.getElementById('year_total').innerText = "0";
-        return;
-    }
+    if (!currentName) { document.getElementById('year_total').innerText = "0"; return; }
 
     for (let key in history) {
-        // KIỂM TRA: Khóa phải bắt đầu bằng Tên và chứa đúng Năm đang chọn
-        // Ví dụ khóa: "Nguyễn Văn A - Tháng 1 - 2026"
         if (key.startsWith(currentName + " -") && key.includes(" - " + selectedYear)) {
             const d = history[key];
             const n = (id) => parseFloat(String(d[id] || '0').replace(/,/g, '')) || 0;
-
-            // Bỏ qua nếu tháng đó không có lương cơ bản (tránh số âm)
             if (n('luongCB') <= 0) continue;
-
             const chuan = n('soCongChuan') || 26;
             const thuc = n('soNgayGio') || 0;
             const tile = thuc / chuan;
-
-            // 1. Thu nhập theo công thực tế
             let t1_thuc = 0;
-            const list1 = ['luongCB','pccv','pckn','pcat','pcpccc','pcsk','pctn','pcdt','pcno','pcdl','pccc'];
-            list1.forEach(id => { t1_thuc += n(id) * tile; });
-
-            // 2. Tính lương tăng ca
+            ['luongCB','pccv','pckn','pcat','pcpccc','pcsk','pctn','pcdt','pcno','pcdl','pccc'].forEach(id => { t1_thuc += n(id) * tile; });
             const luongTC = n('luongCB') + n('pccv') + n('pckn') + n('pctn') + n('pcsk') + n('pcno');
             const gioTC = luongTC / chuan / 8;
             let t3 = (n('g150')*1.5 + n('g200')*2 + n('g210')*2.1 + n('g200cn')*2 + n('g270')*2.7 + n('g300')*3 + n('g390')*3.9) * gioTC;
-
-            // 3. Khoản thu khác
             let pnu = d.chk_pnu ? (gioTC * 2.25) : 0;
             let t2 = pnu + n('tk') + n('trenho') + n('phepton') + n('dcluong') + n('th_da') + n('th_khac') + n('pc_an') + n('pc_hoso');
-
-            // 4. Các khoản giảm trừ
             const bh = (n('luongCB') + n('pccv') + n('pckn') + n('pctn') + n('pcsk')) * 0.105;
             let t4 = bh + 30000 + n('trukhac');
-
-            // Tổng thực lĩnh của tháng đó
             totalYear += (t1_thuc + t2 + t3 - t4);
         }
     }
-    
-    // Hiển thị kết quả
     document.getElementById('year_total').innerText = fN(totalYear);
 }
-function toggleYearTotal() {
-    const isChecked = document.getElementById('show_year_total').checked;
-    const content = document.getElementById('year_total_content');
-    const placeholder = document.getElementById('year_total_placeholder');
 
-    if (isChecked) {
-        content.style.display = 'flex';      // Hiện số tiền
-        placeholder.style.display = 'none';   // Ẩn chữ gợi ý
-        calculateYearTotal();                // Tính toán lại số liệu cho mới nhất
-    } else {
-        content.style.display = 'none';      // Ẩn số tiền
-        placeholder.style.display = 'inline'; // Hiện chữ gợi ý
-    }
-}
-function updateVisitCount() {
-    // Sử dụng dịch vụ countapi-key (miễn phí và không cần đăng ký)
-    // Lưu ý: Thay 'gigalane_salary_v6' bằng một cái tên riêng biệt của bạn
-    fetch('https://api.countapi.xyz/hit/gigalane_salary_v6/visits')
-        .then(res => res.json())
-        .then(res => {
-            document.getElementById('visit_count').innerText = res.value;
-        })
-        .catch(err => {
-            document.getElementById('visit_count').innerText = "N/A";
-        });
-}
-
-function deleteMonthlyData() {
-    const name = document.getElementById('userName').value.trim() || "Unknow";
-    const month = document.getElementById('selMonth').value;
-    const year = document.getElementById('selYear').value;
-    const key = `${name} - Tháng ${month} - ${year}`;
+window.onload = () => {
+    // Ưu tiên nạp dữ liệu từ nháp trước để giữ trạng thái Tháng/Năm cũ
+    const draft = JSON.parse(localStorage.getItem(DRAFT_KEY) || '{}');
+    if (draft.selMonth) document.getElementById('selMonth').value = draft.selMonth;
+    else document.getElementById('selMonth').value = new Date().getMonth() + 1;
     
-    let history = JSON.parse(localStorage.getItem(STORAGE_KEY_HISTORY) || '{}');
+    if (draft.selYear) document.getElementById('selYear').value = draft.selYear;
+    else document.getElementById('selYear').value = new Date().getFullYear();
 
-    // Kiểm tra xem có dữ liệu để xoá không
-    if (!history[key]) {
-        alert(`Không tìm thấy dữ liệu lưu cho [${key}] để xoá.`);
-        return;
-    }
+    updateHistoryList(); 
+    updateCongChuan();
+    load(false); 
 
-    // Xác nhận lần 1
-    if (confirm(`BẠN CÓ CHẮC CHẮN muốn xoá phiếu lương của: ${key}?`)) {
-        // Xác nhận lần 2
-        if (confirm(`CẢNH BÁO: Dữ liệu sau khi xoá sẽ không thể khôi phục. Bạn vẫn muốn xoá chứ?`)) {
-            
-            // Thực hiện xoá
-            delete history[key];
-            localStorage.setItem(STORAGE_KEY_HISTORY, JSON.stringify(history));
-            
-            alert('Đã xoá dữ liệu thành công.');
-            
-            // Cập nhật lại giao diện
-            updateHistoryList();
-            load(); // Quay về trạng thái "Đang nhập" trống
-            if(typeof calculateYearTotal === 'function') calculateYearTotal();
-        }
-    }
-}
-function cleanOldHistory() {
-    let history = JSON.parse(localStorage.getItem(STORAGE_KEY_HISTORY) || '{}');
-    let newHistory = {};
-    let count = 0;
-    let hasOldData = false;
-
-    for (let key in history) {
-        if (key.includes(" - Tháng") && key.split(" - ").length >= 3) {
-            newHistory[key] = history[key];
-        } else {
-            count++;
-            hasOldData = true;
-        }
-    }
-
-    if (hasOldData && count > 0) {
-        if (confirm(`Tìm thấy ${count} bản lưu cũ không có tên. Bạn có muốn dọn dẹp không?`)) {
-            localStorage.setItem(STORAGE_KEY_HISTORY, JSON.stringify(newHistory));
-            updateHistoryList();
-            load();
-        }
-    }
-}
-
+    let visits = localStorage.getItem('personal_visits') || 0;
+    localStorage.setItem('personal_visits', ++visits);
+    document.getElementById('visit_count').innerText = visits;
+};
 </script>
 </body>
 </html>
