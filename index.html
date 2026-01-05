@@ -95,11 +95,11 @@
         <div class="header-left">
             <div><label>HỌ TÊN:</label> <input type="text" id="userName" placeholder="Nhập tên..." class="input-name save"></div>
             <div>
-                <select id="selMonth" class="select-date save" onchange="updateCongChuan(); calculateAll()">
+                <select id="selMonth" class="select-date save" onchange="updateCongChuan(); load(); calculateAll()">
                     <script>for(let i=1; i<=12; i++) document.write(`<option value="${i}">Tháng ${i}</option>`)</script>
                 </select>
                 <!-- <select id="selYear" class="select-date save" onchange="updateCongChuan(); calculateAll(); calculateYearTotal();"> -->
-                    <select id="selYear" class="select-date save" onchange="document.getElementById('show_year_total').checked = false; toggleYearTotal(); updateCongChuan(); calculateAll();">
+                    <select id="selYear" class="select-date save" onchange="document.getElementById('show_year_total').checked = false; toggleYearTotal(); updateCongChuan(); load(); calculateAll();">
                     <script>for(let i=2025; i<=2035; i++) document.write(`<option value="${i}">Năm ${i}</option>`)</script>
                 </select>
             </div>
@@ -322,15 +322,21 @@ function saveMonthlyData() {
     calculateYearTotal(); 
 }
 
-    function updateHistoryList() {
-        const select = document.getElementById('historySelect');
-        const history = JSON.parse(localStorage.getItem(STORAGE_KEY_HISTORY) || '{}');
-        select.innerHTML = '<option value="current">-- Đang nhập --</option>';
-        Object.keys(history).sort().forEach(key => {
-            let opt = document.createElement('option'); opt.value = key; opt.innerText = key;
-            select.appendChild(opt);
-        });
-    }
+function updateHistoryList() {
+    const select = document.getElementById('historySelect');
+    const history = JSON.parse(localStorage.getItem(STORAGE_KEY_HISTORY) || '{}');
+    
+    // Reset danh sách
+    select.innerHTML = '<option value="current">-- Đang nhập --</option>';
+    
+    // Lấy danh sách tháng đã lưu, sắp xếp và đưa vào menu
+    Object.keys(history).sort().forEach(key => {
+        let opt = document.createElement('option'); 
+        opt.value = key; 
+        opt.innerText = key;
+        select.appendChild(opt);
+    });
+}
 
     function loadMonthlyData() {
         const select = document.getElementById('historySelect');
@@ -353,18 +359,19 @@ function saveMonthlyData() {
     }
 
 function load() {
-    // 1. Lấy tháng và năm đang hiển thị trên màn hình
     const month = document.getElementById('selMonth').value;
     const year = document.getElementById('selYear').value;
-    const historyKey = `Tháng ${month} - ${year}`;
+    const historyKey = `Tháng ${month} - ${year}`; // Tạo khóa: ví dụ "Tháng 1 - 2026"
     
     const history = JSON.parse(localStorage.getItem(STORAGE_KEY_HISTORY) || '{}');
     const historySelect = document.getElementById('historySelect');
 
-    // 2. Kiểm tra nếu tháng này đã được lưu trong lịch sử
+    // KIỂM TRA: Nếu tháng hiện tại đã có trong lịch sử
     if (history[historyKey]) {
-        historySelect.value = historyKey; // Tự động chọn tháng đó trong danh sách Lịch sử
+        historySelect.value = historyKey; // Tự động chọn dòng này trong ô Lịch sử
         const data = history[historyKey];
+        
+        // Đổ dữ liệu từ bản lưu vào các ô input
         for (let id in data) {
             let e = document.getElementById(id);
             if (e) { 
@@ -373,16 +380,20 @@ function load() {
             }
         }
     } else {
-        // Nếu chưa có trong lịch sử, quay về chế độ "Đang nhập" và load dữ liệu nháp (nếu có)
+        // Nếu CHƯA CÓ lịch sử cho tháng này, hiển thị "Đang nhập" và xóa trắng các ô cũ
         historySelect.value = 'current';
-        const d = JSON.parse(localStorage.getItem('salary_gigalane_2025_v6'));
-        if(d) {
-            for (let k in d) {
+        
+        // Load dữ liệu tạm thời (nháp) nếu bạn có dùng cơ chế lưu nháp
+        const draft = JSON.parse(localStorage.getItem('salary_gigalane_2025_v6'));
+        if(draft) {
+            for (let k in draft) {
                 let e = document.getElementById(k);
-                if(e) { if(e.type === 'checkbox') e.checked = d[k]; else e.value = d[k]; }
+                if(e) { if(e.type === 'checkbox') e.checked = draft[k]; else e.value = draft[k]; }
             }
         }
     }
+    
+    // Cuối cùng là tính toán lại con số
     calculateAll();
     if(typeof calculateYearTotal === 'function') calculateYearTotal();
 }
